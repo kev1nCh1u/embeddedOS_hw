@@ -195,15 +195,15 @@ static  void  StartupTask (void *p_arg)
 void task1(void* p_arg) {
     (void)p_arg;
     while (1) {
-        printf("Hello from task1\n");
-        OSTimeDly(2);
+        //printf("Hello from task1\n");
+        OSTimeDly(3);
     }
 }
 
 void task2(void* p_arg) {
     (void)p_arg;
     while (1) {
-        printf("Hello from task2\n");
-        OSTimeDly(3);
+        //printf("Hello from task2\n");
+        OSTimeDly(6);
     }
 }

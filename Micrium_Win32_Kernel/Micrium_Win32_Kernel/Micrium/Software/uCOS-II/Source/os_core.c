@@ -88,6 +88,8 @@ static  void  OS_InitTCBList(void);
 
 static  void  OS_SchedNew(void);
 
+void Kevin_StartContextSwitches(void);
+void Kevin_ContextSwitches(void);
 
 /*
 *********************************************************************************************************
@@ -694,6 +696,7 @@ void  OSIntEnter (void)
 
 void  OSIntExit (void)
 {
+    
 #if OS_CRITICAL_METHOD == 3u                               /* Allocate storage for CPU status register */
     OS_CPU_SR  cpu_sr = 0u;
 #endif
@@ -709,10 +712,12 @@ void  OSIntExit (void)
             if (OSLockNesting == 0u) {                     /* ... and not locked.                      */
                 OS_SchedNew();
                 OSTCBHighRdy = OSTCBPrioTbl[OSPrioHighRdy];
+                
                 if (OSPrioHighRdy != OSPrioCur) {          /* No Ctx Sw if current task is highest rdy */
 #if OS_TASK_PROFILE_EN > 0u
                     OSTCBHighRdy->OSTCBCtxSwCtr++;         /* Inc. # of context switches to this task  */
 #endif
+                    
                     OSCtxSwCtr++;                          /* Keep track of the number of ctx switches */
 
 #if OS_TASK_CREATE_EXT_EN > 0u
@@ -721,7 +726,7 @@ void  OSIntExit (void)
 #endif
 #endif
                     OS_TRACE_ISR_EXIT_TO_SCHEDULER();
-
+                    Kevin_ContextSwitches();
                     OSIntCtxSw();                          /* Perform interrupt level ctx switch       */
                 } else {
                     OS_TRACE_ISR_EXIT();
@@ -732,7 +737,7 @@ void  OSIntExit (void)
         } else {
             OS_TRACE_ISR_EXIT();
         }
-
+        
         OS_EXIT_CRITICAL();
     }
 }
@@ -783,6 +788,7 @@ void  OSSafetyCriticalStart (void)
 #if OS_SCHED_LOCK_EN > 0u
 void  OSSchedLock (void)
 {
+
 #if OS_CRITICAL_METHOD == 3u                     /* Allocate storage for CPU status register           */
     OS_CPU_SR  cpu_sr = 0u;
 #endif
@@ -875,6 +881,7 @@ void  OSStart (void)
         OSPrioCur     = OSPrioHighRdy;
         OSTCBHighRdy  = OSTCBPrioTbl[OSPrioHighRdy]; /* Point to highest priority task ready to run    */
         OSTCBCur      = OSTCBHighRdy;
+        Kevin_StartContextSwitches();
         OSStartHighRdy();                            /* Execute target specific code to start task     */
     }
 }
@@ -1702,33 +1709,42 @@ void  OS_MemCopy (INT8U  *pdest,
 
 void  OS_Sched (void)
 {
+    
 #if OS_CRITICAL_METHOD == 3u                           /* Allocate storage for CPU status register     */
     OS_CPU_SR  cpu_sr = 0u;
 #endif
 
-
+    
 
     OS_ENTER_CRITICAL();
     if (OSIntNesting == 0u) {                          /* Schedule only if all ISRs done and ...       */
+        
         if (OSLockNesting == 0u) {                     /* ... scheduler is not locked                  */
             OS_SchedNew();
+            
             OSTCBHighRdy = OSTCBPrioTbl[OSPrioHighRdy];
+            
+
             if (OSPrioHighRdy != OSPrioCur) {          /* No Ctx Sw if current task is highest rdy     */
 #if OS_TASK_PROFILE_EN > 0u
                 OSTCBHighRdy->OSTCBCtxSwCtr++;         /* Inc. # of context switches to this task      */
+                
+
 #endif
                 OSCtxSwCtr++;                          /* Increment context switch counter             */
-
 #if OS_TASK_CREATE_EXT_EN > 0u
 #if defined(OS_TLS_TBL_SIZE) && (OS_TLS_TBL_SIZE > 0u)
                 OS_TLS_TaskSw();
 #endif
 #endif
-
+                Kevin_ContextSwitches();
                 OS_TASK_SW();                          /* Perform a context switch                     */
+                
             }
         }
+        
     }
+    
     OS_EXIT_CRITICAL();
 }
 
@@ -2135,4 +2151,14 @@ INT8U  OS_TCBInit (INT8U    prio,
     }
     OS_EXIT_CRITICAL();
     return (OS_ERR_TASK_NO_MORE_TCB);
+}
+
+///////////////////////////////////// kevin print Context Switches ////////////////////////////////////////////////
+void Kevin_StartContextSwitches(void) {
+    printf("\nTick \t From Task \t To Task\n"); // kevin title
+    printf("%d \t ******** \t task(%d)\n", OSTimeGet(), OSTCBCur->OSTCBPrio, OSTCBHighRdy->OSTCBPrio); // kevin
+}
+
+void Kevin_ContextSwitches(void) {
+    printf("%d \t task(%d) \t task(%d)\n", OSTimeGet(), OSTCBCur->OSTCBPrio, OSTCBHighRdy->OSTCBPrio); // kevin
 }
