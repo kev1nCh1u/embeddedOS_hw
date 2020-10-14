@@ -1,0 +1,2 @@
+C:\Users\user\Desktop\嵌入式_20201014\Micrium_Win32_Kernel\Micrium_Win32_Kernel\Microsoft\Windows\Kernel\OS2\VS\Debug\OS2.exe
+C:\Users\user\Desktop\嵌入式_20201014\Micrium_Win32_Kernel\Micrium_Win32_Kernel\Microsoft\Windows\Kernel\OS2\VS\Debug\OS2.pdb
