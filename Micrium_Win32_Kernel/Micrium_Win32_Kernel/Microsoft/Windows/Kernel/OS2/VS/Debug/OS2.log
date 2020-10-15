@@ -1,4 +1,0 @@
-﻿  os_core.c
-C:\Users\user\Desktop\嵌入式_20201014\Micrium_Win32_Kernel\Micrium_Win32_Kernel\Micrium\Software\uCOS-II\Source\os_core.c(2159,90): warning C4474: 'printf': 傳遞給格式字串的引數太多
-C:\Users\user\Desktop\嵌入式_20201014\Micrium_Win32_Kernel\Micrium_Win32_Kernel\Micrium\Software\uCOS-II\Source\os_core.c(2159,90): message : 預留位置及其參數需要 2 個 variadic 引數，但卻提供了 3 個
-  OS2.vcxproj -> C:\Users\user\Desktop\嵌入式_20201014\Micrium_Win32_Kernel\Micrium_Win32_Kernel\Microsoft\Windows\Kernel\OS2\VS\Debug\OS2.exe
