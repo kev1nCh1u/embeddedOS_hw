@@ -1,0 +1,28 @@
+﻿  cpu_core.c
+  cpu_c.c
+  lib_ascii.c
+  lib_math.c
+  lib_mem.c
+  lib_str.c
+  os_cpu_c.c
+  os_core.c
+C:\Users\user\Documents\Git\嵌入式作業系統實作HW\20201028_project1\Micrium_Win32_Kernel\Micrium_Win32_Kernel\Micrium\Software\uCOS-II\Source\os_core.c(2159,90): warning C4474: 'printf': 傳遞給格式字串的引數太多
+C:\Users\user\Documents\Git\嵌入式作業系統實作HW\20201028_project1\Micrium_Win32_Kernel\Micrium_Win32_Kernel\Micrium\Software\uCOS-II\Source\os_core.c(2159,90): message : 預留位置及其參數需要 2 個 variadic 引數，但卻提供了 3 個
+  os_dbg_r.c
+  os_flag.c
+  os_mbox.c
+  os_mem.c
+  os_mutex.c
+  os_q.c
+  os_sem.c
+  os_task.c
+  os_time.c
+  os_tmr.c
+  bsp_cpu.c
+  app_hooks.c
+  正在產生程式碼...
+  正在編譯...
+  main.c
+C:\Users\user\Documents\Git\嵌入式作業系統實作HW\20201028_project1\Micrium_Win32_Kernel\Micrium_Win32_Kernel\Microsoft\Windows\Kernel\OS2\main.c(97,17): warning C4101: 'os_err': 未參考的區域變數
+  正在產生程式碼...
+  OS2.vcxproj -> C:\Users\user\Documents\Git\嵌入式作業系統實作HW\20201028_project1\Micrium_Win32_Kernel\Micrium_Win32_Kernel\Microsoft\Windows\Kernel\OS2\VS\Debug\OS2.exe
