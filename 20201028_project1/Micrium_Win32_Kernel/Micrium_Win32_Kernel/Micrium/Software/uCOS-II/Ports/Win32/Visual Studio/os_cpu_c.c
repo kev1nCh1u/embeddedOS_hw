@@ -68,7 +68,7 @@
 
 #define  WIN_MM_MIN_RES                                     1u          /* Minimum timer resolution.                                */
 
-#define  OS_MSG_TRACE                                       1u          /* Allow print trace messages.                              */
+#define  OS_MSG_TRACE                                       1u          /* Allow print trace messages.                              */ // kevin dont show Deleted
 
 #ifdef  _MSC_VER
 #define  MS_VC_EXCEPTION                           0x406D1388

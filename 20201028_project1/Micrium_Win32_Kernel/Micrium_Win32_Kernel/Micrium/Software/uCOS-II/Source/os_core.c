@@ -88,8 +88,11 @@ static  void  OS_InitTCBList(void);
 
 static  void  OS_SchedNew(void);
 
+/////////////////////////////// kevin /////////////////////////////////////////
 void Kevin_StartContextSwitches(void);
 void Kevin_ContextSwitches(void);
+void Kevin_OS_SchedNew(void);
+//////////////////////////////////////////////////////////////////////////////
 
 /*
 *********************************************************************************************************
@@ -726,7 +729,7 @@ void  OSIntExit (void)
 #endif
 #endif
                     OS_TRACE_ISR_EXIT_TO_SCHEDULER();
-                    Kevin_ContextSwitches();
+                    Kevin_ContextSwitches(); // Kevin ContextSwitches
                     OSIntCtxSw();                          /* Perform interrupt level ctx switch       */
                 } else {
                     OS_TRACE_ISR_EXIT();
@@ -877,11 +880,12 @@ void  OSSchedUnlock (void)
 void  OSStart (void)
 {
     if (OSRunning == OS_FALSE) {
+        Kevin_StartContextSwitches();
         OS_SchedNew();                               /* Find highest priority's task priority number   */
         OSPrioCur     = OSPrioHighRdy;
         OSTCBHighRdy  = OSTCBPrioTbl[OSPrioHighRdy]; /* Point to highest priority task ready to run    */
         OSTCBCur      = OSTCBHighRdy;
-        Kevin_StartContextSwitches();
+
         OSStartHighRdy();                            /* Execute target specific code to start task     */
     }
 }
@@ -1737,7 +1741,7 @@ void  OS_Sched (void)
                 OS_TLS_TaskSw();
 #endif
 #endif
-                Kevin_ContextSwitches();
+                Kevin_ContextSwitches(); // Kevin ContextSwitches
                 OS_TASK_SW();                          /* Perform a context switch                     */
                 
             }
@@ -1770,9 +1774,11 @@ static  void  OS_SchedNew (void)
 #if OS_LOWEST_PRIO <= 63u                        /* See if we support up to 64 tasks                   */
     INT8U   y;
 
-
     y             = OSUnMapTbl[OSRdyGrp];
-    OSPrioHighRdy = (INT8U)((y << 3u) + OSUnMapTbl[OSRdyTbl[y]]);
+    // OSPrioHighRdy = (INT8U)((y << 3u) + OSUnMapTbl[OSRdyTbl[y]]); // kevin
+
+    Kevin_OS_SchedNew(); // kevin find OSPrioHighRdy
+
 #else                                            /* We support up to 256 tasks                         */
     INT8U     y;
     OS_PRIO  *ptbl;
@@ -2155,10 +2161,64 @@ INT8U  OS_TCBInit (INT8U    prio,
 
 ///////////////////////////////////// kevin print Context Switches ////////////////////////////////////////////////
 void Kevin_StartContextSwitches(void) {
-    printf("\nTick \t From Task \t To Task\n"); // kevin title
-    printf("%d \t ******** \t task(%d)\n", OSTimeGet(), OSTCBCur->OSTCBPrio, OSTCBHighRdy->OSTCBPrio); // kevin
+    // for(int i = 1; i <= kevin_task_num; i++){
+    //     kevin_arr_task_periodic[i].work += kevin_arr_task_periodic[i].execution;
+    // }
+   printf("\nTick \t Event \t \t CurrentTask ID \t NextTask ID \t ResponseTime \t # of ContextSwitch \n"); // kevin title
+   // printf("%d \t ******** \t task(%d)\n", OSTimeGet(), OSTCBCur->OSTCBPrio, OSTCBHighRdy->OSTCBPrio); // kevin
 }
 
 void Kevin_ContextSwitches(void) {
-    printf("%d \t task(%d) \t task(%d)\n", OSTimeGet(), OSTCBCur->OSTCBPrio, OSTCBHighRdy->OSTCBPrio); // kevin
+    if((kevin_arr_task_periodic[OSTCBCur->OSTCBPrio].work == 0 ) && OSTCBCur->OSTCBPrio != 63)
+    {
+        printf("%d \t Completion \t task(%d)(%d) \t \t task(%d)(%d) \t \t %d \t \t %d \n", OSTime, OSTCBCur->OSTCBPrio,kevin_arr_task_periodic[OSTCBCur->OSTCBPrio].job, OSTCBHighRdy->OSTCBPrio ,kevin_arr_task_periodic[OSTCBHighRdy->OSTCBPrio].job, kevin_arr_task_periodic[OSTCBCur->OSTCBPrio].response, kevin_arr_task_periodic[OSTCBCur->OSTCBPrio].context); // kevin
+        kevin_arr_task_periodic[OSTCBCur->OSTCBPrio].job++;
+    }
+    else
+        printf("%d \t Preemption \t task(%d)(%d) \t \t task(%d)(%d) \n", OSTime, OSTCBCur->OSTCBPrio,kevin_arr_task_periodic[OSTCBCur->OSTCBPrio].job, OSTCBHighRdy->OSTCBPrio ,kevin_arr_task_periodic[OSTCBHighRdy->OSTCBPrio].job); // kevin
+    
+    for(int i = 1; i <= kevin_task_num; i++){
+        kevin_arr_task_periodic[i].context++;
+    }
 }
+
+void Kevin_OS_SchedNew(void) {
+    
+    // counter
+    if (OSPrioHighRdy <= kevin_task_num && OSTime != 0) {
+        kevin_arr_task_periodic[OSPrioHighRdy].work--;
+    }
+    for(int i = 1; i <= kevin_task_num; i++){
+        kevin_arr_task_periodic[i].response++;
+    }
+
+    // periodic plus work
+    //int now_OSTime = OSTime + 1;
+    for(int i = 1; i <= kevin_task_num; i++){
+        if(OSTime % kevin_arr_task_periodic[i].period  == 0){
+            kevin_arr_task_periodic[i].work += kevin_arr_task_periodic[i].execution;
+            kevin_arr_task_periodic[i].response = 0;
+            kevin_arr_task_periodic[i].context = 1;
+            // printf("task:%d OSTime:%d\n", i, OSTime);
+            OSPrioHighRdy = 1;
+        }
+    }
+
+    // find OSPrioHighRdy
+    if (kevin_arr_task_periodic[OSPrioHighRdy].work == 0 || OSPrioHighRdy == 63) {
+        for (int i = 1; i <= kevin_task_num; i++)
+        {
+            if (kevin_arr_task_periodic[i].work != 0)
+            {
+                OSPrioHighRdy = i;
+                break;
+            }
+        }
+        if(kevin_arr_task_periodic[OSPrioHighRdy].work == 0) {
+            OSPrioHighRdy = 63;
+        }
+    }
+
+    // printf("OS_SchedNew OSTime:%d OSPrioHighRdy:%d work:%d \n", OSTime, OSPrioHighRdy, kevin_arr_task_periodic[OSPrioHighRdy].work); // kevin
+}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -785,6 +785,28 @@ OS_EXT  OS_TMR_WHEEL      OSTmrWheelTbl[OS_TMR_CFG_WHEEL_SIZE];
 extern  INT8U   const     OSUnMapTbl[256];          /* Priority->Index    lookup table                 */
 
 
+//////////////////////////////////////////// kevin ///////////////////////////////////////////////////
+
+struct KevinPeriodic {
+    INT8U arrival;      // 開始時間
+    INT8U execution;    // 每次工作量
+    INT8U period;       // 週期期限
+    INT8U job;          // 紀錄工作幾輪
+    INT8U response;     // 紀錄所花時間
+    INT8U context;      // 紀錄切換次數
+    INT8U work;      // 紀錄當前工作
+};
+
+struct KevinPeriodic kevin_arr_task_periodic[4];
+
+struct KevinPeriodic *kevin_task1_periodic;
+struct KevinPeriodic *kevin_task2_periodic;
+struct KevinPeriodic *kevin_task3_periodic;
+
+INT8U kevin_task_num;
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+
 /*
 *********************************************************************************************************
 *                                          FUNCTION PROTOTYPES

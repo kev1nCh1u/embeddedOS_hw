@@ -46,8 +46,14 @@
 *                                            LOCAL DEFINES
 *********************************************************************************************************
 */
-static void task1(void* p_arg);
-static void task2(void* p_arg);
+
+#define TASK_STACKSIZE   2048
+#define TASK1_PRIORITY   1
+#define TASK2_PRIORITY   2
+#define TASK3_PRIORITY   3
+#define TASK1_ID         1
+#define TASK2_ID         2
+#define TASK3_ID         3
 
 /*
 *********************************************************************************************************
@@ -57,15 +63,9 @@ static void task2(void* p_arg);
 
 static  OS_STK  StartupTaskStk[APP_CFG_STARTUP_TASK_STK_SIZE];
 
-#define TASK_STACKSIZE   2048
-#define TASK1_PRIORITY   1
-#define TASK2_PRIORITY   2
-#define TASK1_ID         1
-#define TASK2_ID         2
-
 static  OS_STK  Task1_STK[TASK_STACKSIZE];
 static  OS_STK  Task2_STK[TASK_STACKSIZE];
-
+static  OS_STK  Task3_STK[TASK_STACKSIZE];
 
 /*
 *********************************************************************************************************
@@ -75,6 +75,8 @@ static  OS_STK  Task2_STK[TASK_STACKSIZE];
 
 static  void  StartupTask (void  *p_arg);
 
+static void task1(void* p_arg);
+static void task2(void* p_arg);
 
 /*
 *********************************************************************************************************
@@ -125,6 +127,26 @@ int  main (void)
                            &os_err);
 #endif
 */
+    //////////////////////////// kevin /////////////////////////////////////////////
+    kevin_task1_periodic = &kevin_arr_task_periodic[1];
+    kevin_task2_periodic = &kevin_arr_task_periodic[2];
+    kevin_task3_periodic = &kevin_arr_task_periodic[3];
+
+    kevin_task1_periodic->arrival = 0;
+    kevin_task1_periodic->execution = 2;
+    kevin_task1_periodic->period = 4;
+
+    kevin_task2_periodic->arrival = 0;
+    kevin_task2_periodic->execution = 3;
+    kevin_task2_periodic->period = 8;
+
+    kevin_task3_periodic->arrival = 0;      // 1
+    kevin_task3_periodic->execution = 0;    // 1
+    kevin_task3_periodic->period = 0;       // 5
+
+    kevin_task_num = 2;
+    //////////////////////////////////////////////////////////////////////////
+    
 
     OSTaskCreateExt(task1,
         0,
@@ -196,7 +218,8 @@ void task1(void* p_arg) {
     (void)p_arg;
     while (1) {
         //printf("Hello from task1\n");
-        OSTimeDly(3);
+        while (1);
+        OSTimeDly(4);
     }
 }
 
@@ -204,6 +227,7 @@ void task2(void* p_arg) {
     (void)p_arg;
     while (1) {
         //printf("Hello from task2\n");
-        OSTimeDly(6);
+        while (1);
+        OSTimeDly(8);
     }
 }

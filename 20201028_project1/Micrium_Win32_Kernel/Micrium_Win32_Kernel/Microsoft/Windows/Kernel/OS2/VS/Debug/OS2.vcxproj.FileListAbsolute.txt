@@ -6,3 +6,5 @@ C:\Users\user\Documents\Git\嵌入式作業系統實作HW\20201014_HW1\Micrium_W
 C:\Users\user\Documents\Git\嵌入式作業系統實作HW\20201014_HW1\Micrium_Win32_Kernel\Micrium_Win32_Kernel\Microsoft\Windows\Kernel\OS2\VS\Debug\OS2.pdb
 C:\Users\user\Documents\Git\嵌入式作業系統實作HW\20201028_project1\Micrium_Win32_Kernel\Micrium_Win32_Kernel\Microsoft\Windows\Kernel\OS2\VS\Debug\OS2.exe
 C:\Users\user\Documents\Git\嵌入式作業系統實作HW\20201028_project1\Micrium_Win32_Kernel\Micrium_Win32_Kernel\Microsoft\Windows\Kernel\OS2\VS\Debug\OS2.pdb
+C:\Users\user\Documents\Git\embeddedOS_hw\20201028_project1\Micrium_Win32_Kernel\Micrium_Win32_Kernel\Microsoft\Windows\Kernel\OS2\VS\Debug\OS2.exe
+C:\Users\user\Documents\Git\embeddedOS_hw\20201028_project1\Micrium_Win32_Kernel\Micrium_Win32_Kernel\Microsoft\Windows\Kernel\OS2\VS\Debug\OS2.pdb
