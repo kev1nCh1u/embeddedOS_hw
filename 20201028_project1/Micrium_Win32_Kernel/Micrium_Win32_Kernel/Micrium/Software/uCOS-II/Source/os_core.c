@@ -880,12 +880,12 @@ void  OSSchedUnlock (void)
 void  OSStart (void)
 {
     if (OSRunning == OS_FALSE) {
-        Kevin_StartContextSwitches();
+        // Kevin_StartContextSwitches();
         OS_SchedNew();                               /* Find highest priority's task priority number   */
         OSPrioCur     = OSPrioHighRdy;
         OSTCBHighRdy  = OSTCBPrioTbl[OSPrioHighRdy]; /* Point to highest priority task ready to run    */
         OSTCBCur      = OSTCBHighRdy;
-
+        Kevin_StartContextSwitches();
         OSStartHighRdy();                            /* Execute target specific code to start task     */
     }
 }
@@ -2161,25 +2161,44 @@ INT8U  OS_TCBInit (INT8U    prio,
 
 ///////////////////////////////////// kevin print Context Switches ////////////////////////////////////////////////
 void Kevin_StartContextSwitches(void) {
-    // for(int i = 1; i <= kevin_task_num; i++){
-    //     kevin_arr_task_periodic[i].work += kevin_arr_task_periodic[i].execution;
-    // }
    printf("\nTick \t Event \t \t CurrentTask ID \t NextTask ID \t ResponseTime \t # of ContextSwitch \n"); // kevin title
-   // printf("%d \t ******** \t task(%d)\n", OSTimeGet(), OSTCBCur->OSTCBPrio, OSTCBHighRdy->OSTCBPrio); // kevin
 }
 
 void Kevin_ContextSwitches(void) {
-    if((kevin_arr_task_periodic[OSTCBCur->OSTCBPrio].work == 0 ) && OSTCBCur->OSTCBPrio != 63)
+    /******************************** print **************************************************************/
+    printf("%d \t ",OSTime);
+
+    if(kevin_arr_task_periodic[OSTCBCur->OSTCBPrio].work == 0 && OSTCBCur->OSTCBPrio != 63)
+        printf("Completion \t ");
+    else
+        printf("Preemption \t ");
+    
+    printf("task(%d)",OSTCBCur->OSTCBPrio);
+    if(OSTCBCur->OSTCBPrio != 63)
+        printf("(%d) ", kevin_arr_task_periodic[OSTCBCur->OSTCBPrio].job);
+    printf("\t \t ");
+
+    printf("task(%d)",OSTCBHighRdy->OSTCBPrio);
+    if(OSTCBHighRdy->OSTCBPrio != 63)
+        printf("(%d) ", kevin_arr_task_periodic[OSTCBHighRdy->OSTCBPrio].job);
+
+    if(kevin_arr_task_periodic[OSTCBCur->OSTCBPrio].work == 0 && OSTCBCur->OSTCBPrio != 63)
     {
-        printf("%d \t Completion \t task(%d)(%d) \t \t task(%d)(%d) \t \t %d \t \t %d \n", OSTime, OSTCBCur->OSTCBPrio,kevin_arr_task_periodic[OSTCBCur->OSTCBPrio].job, OSTCBHighRdy->OSTCBPrio ,kevin_arr_task_periodic[OSTCBHighRdy->OSTCBPrio].job, kevin_arr_task_periodic[OSTCBCur->OSTCBPrio].response, kevin_arr_task_periodic[OSTCBCur->OSTCBPrio].context); // kevin
+        printf("\t \t %d \t \t %d ", kevin_arr_task_periodic[OSTCBCur->OSTCBPrio].response, kevin_arr_task_periodic[OSTCBCur->OSTCBPrio].context);
         kevin_arr_task_periodic[OSTCBCur->OSTCBPrio].job++;
     }
-    else
-        printf("%d \t Preemption \t task(%d)(%d) \t \t task(%d)(%d) \n", OSTime, OSTCBCur->OSTCBPrio,kevin_arr_task_periodic[OSTCBCur->OSTCBPrio].job, OSTCBHighRdy->OSTCBPrio ,kevin_arr_task_periodic[OSTCBHighRdy->OSTCBPrio].job); // kevin
-    
+    printf("\n");
+    /******************************************************************************************************/
+
+    /************ context counting  *****************************************************************/
     for(int i = 1; i <= kevin_task_num; i++){
-        kevin_arr_task_periodic[i].context++;
+        if(kevin_arr_task_periodic[i].work < kevin_arr_task_periodic[i].execution || OSPrioHighRdy == i)
+        {
+            kevin_arr_task_periodic[i].context++;
+            // printf("task:%d work:%d\n", i, kevin_arr_task_periodic[i].work);
+        } 
     }
+    /*************************************************************************************************/
 }
 
 void Kevin_OS_SchedNew(void) {
@@ -2193,30 +2212,26 @@ void Kevin_OS_SchedNew(void) {
     }
 
     // periodic plus work
-    //int now_OSTime = OSTime + 1;
     for(int i = 1; i <= kevin_task_num; i++){
         if(OSTime % kevin_arr_task_periodic[i].period  == 0){
             kevin_arr_task_periodic[i].work += kevin_arr_task_periodic[i].execution;
             kevin_arr_task_periodic[i].response = 0;
             kevin_arr_task_periodic[i].context = 1;
             // printf("task:%d OSTime:%d\n", i, OSTime);
-            OSPrioHighRdy = 1;
         }
     }
 
     // find OSPrioHighRdy
-    if (kevin_arr_task_periodic[OSPrioHighRdy].work == 0 || OSPrioHighRdy == 63) {
-        for (int i = 1; i <= kevin_task_num; i++)
+    for (int i = 1; i <= kevin_task_num; i++)
+    {
+        if (kevin_arr_task_periodic[i].work != 0)
         {
-            if (kevin_arr_task_periodic[i].work != 0)
-            {
-                OSPrioHighRdy = i;
-                break;
-            }
+            OSPrioHighRdy = i;
+            break;
         }
-        if(kevin_arr_task_periodic[OSPrioHighRdy].work == 0) {
-            OSPrioHighRdy = 63;
-        }
+    }
+    if(kevin_arr_task_periodic[OSPrioHighRdy].work == 0) {
+        OSPrioHighRdy = 63;
     }
 
     // printf("OS_SchedNew OSTime:%d OSPrioHighRdy:%d work:%d \n", OSTime, OSPrioHighRdy, kevin_arr_task_periodic[OSPrioHighRdy].work); // kevin

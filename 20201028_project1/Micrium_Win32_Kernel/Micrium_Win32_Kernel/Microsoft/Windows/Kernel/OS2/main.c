@@ -168,6 +168,7 @@ int  main (void)
         0,
         (OS_TASK_OPT_STK_CHK | OS_TASK_OPT_STK_CLR));
 
+    OSTimeSet(0);    // kevin reset time
     OSStart();                                                  /* Start multitasking (i.e. give control to uC/OS-II)   */
 
     while (DEF_ON) {                                            /* Should Never Get Here.                               */
@@ -219,7 +220,6 @@ void task1(void* p_arg) {
     while (1) {
         //printf("Hello from task1\n");
         while (1);
-        OSTimeDly(4);
     }
 }
 
@@ -228,6 +228,5 @@ void task2(void* p_arg) {
     while (1) {
         //printf("Hello from task2\n");
         while (1);
-        OSTimeDly(8);
     }
 }

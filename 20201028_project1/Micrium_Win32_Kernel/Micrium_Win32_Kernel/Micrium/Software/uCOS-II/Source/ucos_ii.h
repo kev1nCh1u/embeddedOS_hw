@@ -794,7 +794,8 @@ struct KevinPeriodic {
     INT8U job;          // 紀錄工作幾輪
     INT8U response;     // 紀錄所花時間
     INT8U context;      // 紀錄切換次數
-    INT8U work;      // 紀錄當前工作
+    INT8U work;         // 紀錄當前工作
+    INT8U sort;         // 排序週期
 };
 
 struct KevinPeriodic kevin_arr_task_periodic[4];
