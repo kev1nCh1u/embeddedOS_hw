@@ -2191,7 +2191,8 @@ void Kevin_ContextSwitches(void) {
     /******************************************************************************************************/
 
     /************ context counting  *****************************************************************/
-    for(int i = 1; i <= kevin_task_num; i++){
+    for(int i = 1; i <= kevin_task_num; i++)
+    {
         if(kevin_arr_task_periodic[i].work < kevin_arr_task_periodic[i].execution || OSPrioHighRdy == i)
         {
             kevin_arr_task_periodic[i].context++;
@@ -2204,16 +2205,20 @@ void Kevin_ContextSwitches(void) {
 void Kevin_OS_SchedNew(void) {
     
     // counter
-    if (OSPrioHighRdy <= kevin_task_num && OSTime != 0) {
+    if (OSPrioHighRdy <= kevin_task_num && OSTime != 0) 
+    {
         kevin_arr_task_periodic[OSPrioHighRdy].work--;
     }
-    for(int i = 1; i <= kevin_task_num; i++){
+    for(int i = 1; i <= kevin_task_num; i++)
+    {
         kevin_arr_task_periodic[i].response++;
     }
 
     // periodic plus work
-    for(int i = 1; i <= kevin_task_num; i++){
-        if(OSTime % kevin_arr_task_periodic[i].period  == 0){
+    for(int i = 1; i <= kevin_task_num; i++)
+    {
+        if(OSTime % kevin_arr_task_periodic[i].period  == 0)
+        {
             kevin_arr_task_periodic[i].work += kevin_arr_task_periodic[i].execution;
             kevin_arr_task_periodic[i].response = 0;
             kevin_arr_task_periodic[i].context = 1;
@@ -2224,13 +2229,22 @@ void Kevin_OS_SchedNew(void) {
     // find OSPrioHighRdy
     for (int i = 1; i <= kevin_task_num; i++)
     {
-        if (kevin_arr_task_periodic[i].work != 0)
+        for(int j = 1; j <= kevin_task_num; j++)
         {
-            OSPrioHighRdy = i;
-            break;
+            if(kevin_arr_task_periodic[j].sort == i)
+            {
+                if (kevin_arr_task_periodic[j].work != 0)
+                {
+                    OSPrioHighRdy = j;
+                    i = kevin_task_num;
+                    break;
+                }
+            }
         }
+        
     }
-    if(kevin_arr_task_periodic[OSPrioHighRdy].work == 0) {
+    if(kevin_arr_task_periodic[OSPrioHighRdy].work == 0)
+    {
         OSPrioHighRdy = 63;
     }
 

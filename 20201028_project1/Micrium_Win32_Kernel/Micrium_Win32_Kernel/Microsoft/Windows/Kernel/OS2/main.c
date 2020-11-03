@@ -132,19 +132,34 @@ int  main (void)
     kevin_task2_periodic = &kevin_arr_task_periodic[2];
     kevin_task3_periodic = &kevin_arr_task_periodic[3];
 
-    kevin_task1_periodic->arrival = 0;
-    kevin_task1_periodic->execution = 2;
-    kevin_task1_periodic->period = 4;
+    kevin_task1_periodic->arrival = 1;
+    kevin_task1_periodic->execution = 1;
+    kevin_task1_periodic->period = 3;
 
     kevin_task2_periodic->arrival = 0;
     kevin_task2_periodic->execution = 3;
-    kevin_task2_periodic->period = 8;
+    kevin_task2_periodic->period = 6;
 
-    kevin_task3_periodic->arrival = 0;      // 1
-    kevin_task3_periodic->execution = 0;    // 1
-    kevin_task3_periodic->period = 0;       // 5
+    kevin_task3_periodic->arrival = 1;      // 1
+    kevin_task3_periodic->execution = 1;    // 1
+    kevin_task3_periodic->period = 5;       // 5
 
     kevin_task_num = 2;
+
+    // kevin sort
+    for(int i = 1; i <= kevin_task_num; i++)
+    {
+        int k = 1;
+        for(int j = 1; j <= kevin_task_num; j++)
+        {
+            if(kevin_arr_task_periodic[i].period > kevin_arr_task_periodic[j].period)
+            {
+                k++;
+            }
+        }
+        kevin_arr_task_periodic[i].sort = k;
+        printf("task%d short:%d\n", i,kevin_arr_task_periodic[i].sort);
+    }
     //////////////////////////////////////////////////////////////////////////
     
 
