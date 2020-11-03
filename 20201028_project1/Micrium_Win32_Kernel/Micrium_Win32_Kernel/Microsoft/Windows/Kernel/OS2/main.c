@@ -194,6 +194,11 @@ int  main (void)
         0,
         (OS_TASK_OPT_STK_CHK | OS_TASK_OPT_STK_CLR));
 
+    printf("================== TCB linked list ==================\n");
+    printf("Task \t Prev_TCB_addr \t TCB_addr \t Next_TCB_addr\n");
+    // for
+    printf("");
+
     OSTimeSet(0);    // kevin reset time
     OSStart();                                                  /* Start multitasking (i.e. give control to uC/OS-II)   */
 
