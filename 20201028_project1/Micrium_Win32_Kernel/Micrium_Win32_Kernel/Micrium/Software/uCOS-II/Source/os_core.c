@@ -2156,9 +2156,9 @@ INT8U  OS_TCBInit (INT8U    prio,
 
         /////////////////////////// kevin /////////////////////////////////
         printf("-------After TCB[%d] being linked-------\n",ptcb->OSTCBPrio);
-        printf("Previous TCB point to address %08x\n", ptcb->OSTCBPrev);
-        printf("Current  TCB point to address %08x\n", ptcb);
-        printf("Next     TCB point to address %08x\n\n", ptcb->OSTCBNext);
+        printf("Previous TCB point to address %08X\n", ptcb->OSTCBPrev);
+        printf("Current  TCB point to address %08X\n", ptcb);
+        printf("Next     TCB point to address %08X\n\n", ptcb->OSTCBNext);
         ///////////////////////////////////////////////////////////////////
 
         return (OS_ERR_NONE);

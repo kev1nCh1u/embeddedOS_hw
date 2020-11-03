@@ -196,8 +196,9 @@ int  main (void)
 
     printf("================== TCB linked list ==================\n");
     printf("Task \t Prev_TCB_addr \t TCB_addr \t Next_TCB_addr\n");
-    // for
-    printf("");
+    for(int i = kevin_task_num; i > 0; i--)
+        printf("%d \t %08X \t %08X \t %08X\n",i, OSTCBPrioTbl[i]->OSTCBPrev, OSTCBPrioTbl[i], OSTCBPrioTbl[i]->OSTCBNext);
+    printf("%d \t %08X \t %08X \t %08X\n",63, OSTCBPrioTbl[63]->OSTCBPrev, OSTCBPrioTbl[63], OSTCBPrioTbl[63]->OSTCBNext);
 
     OSTimeSet(0);    // kevin reset time
     OSStart();                                                  /* Start multitasking (i.e. give control to uC/OS-II)   */
