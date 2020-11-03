@@ -77,6 +77,7 @@ static  void  StartupTask (void  *p_arg);
 
 static void task1(void* p_arg);
 static void task2(void* p_arg);
+static void task3(void* p_arg);
 
 /*
 *********************************************************************************************************
@@ -144,7 +145,7 @@ int  main (void)
     kevin_task3_periodic->execution = 1;    // 1
     kevin_task3_periodic->period = 5;       // 5
 
-    kevin_task_num = 2;
+    kevin_task_num = 3;
 
     // kevin sort
     for(int i = 1; i <= kevin_task_num; i++)
@@ -158,7 +159,7 @@ int  main (void)
             }
         }
         kevin_arr_task_periodic[i].sort = k;
-        printf("task%d short:%d\n", i,kevin_arr_task_periodic[i].sort);
+        // printf("=>task%d short:%d\n", i,kevin_arr_task_periodic[i].sort);
     }
     //////////////////////////////////////////////////////////////////////////
     
@@ -179,6 +180,16 @@ int  main (void)
         TASK2_PRIORITY,
         TASK2_ID,
         &Task2_STK[0],
+        TASK_STACKSIZE,
+        0,
+        (OS_TASK_OPT_STK_CHK | OS_TASK_OPT_STK_CLR));
+
+    OSTaskCreateExt(task3,
+        0,
+        &Task3_STK[TASK_STACKSIZE - 1],
+        TASK3_PRIORITY,
+        TASK3_ID,
+        &Task3_STK[0],
         TASK_STACKSIZE,
         0,
         (OS_TASK_OPT_STK_CHK | OS_TASK_OPT_STK_CLR));
@@ -242,6 +253,14 @@ void task2(void* p_arg) {
     (void)p_arg;
     while (1) {
         //printf("Hello from task2\n");
+        while (1);
+    }
+}
+
+void task3(void* p_arg) {
+    (void)p_arg;
+    while (1) {
+        //printf("Hello from task3\n");
         while (1);
     }
 }

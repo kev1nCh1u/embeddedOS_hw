@@ -2217,16 +2217,18 @@ void Kevin_OS_SchedNew(void) {
     // periodic plus work
     for(int i = 1; i <= kevin_task_num; i++)
     {
-        if(OSTime % kevin_arr_task_periodic[i].period  == 0)
+        int j = (OSTime - kevin_arr_task_periodic[i].arrival);
+        if(j >= 0 && j % kevin_arr_task_periodic[i].period  == 0)
         {
             kevin_arr_task_periodic[i].work += kevin_arr_task_periodic[i].execution;
             kevin_arr_task_periodic[i].response = 0;
             kevin_arr_task_periodic[i].context = 1;
-            // printf("task:%d OSTime:%d\n", i, OSTime);
         }
+        // printf("task:%d OSTime:%d %d work:%d\n", i,(OSTime - kevin_arr_task_periodic[i].arrival), (OSTime - kevin_arr_task_periodic[i].arrival) % kevin_arr_task_periodic[i].period,kevin_arr_task_periodic[i].work);
     }
 
     // find OSPrioHighRdy
+    OSPrioHighRdy = 63;
     for (int i = 1; i <= kevin_task_num; i++)
     {
         for(int j = 1; j <= kevin_task_num; j++)
@@ -2241,12 +2243,11 @@ void Kevin_OS_SchedNew(void) {
                 }
             }
         }
-        
     }
-    if(kevin_arr_task_periodic[OSPrioHighRdy].work == 0)
-    {
-        OSPrioHighRdy = 63;
-    }
+    // if(kevin_arr_task_periodic[OSPrioHighRdy].work == 0)
+    // {
+    //     OSPrioHighRdy = 63;
+    // }
 
     // printf("OS_SchedNew OSTime:%d OSPrioHighRdy:%d work:%d \n", OSTime, OSPrioHighRdy, kevin_arr_task_periodic[OSPrioHighRdy].work); // kevin
 }
