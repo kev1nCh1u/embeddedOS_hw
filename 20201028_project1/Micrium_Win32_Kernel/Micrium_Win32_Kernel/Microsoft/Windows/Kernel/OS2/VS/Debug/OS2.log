@@ -1,3 +1,0 @@
-﻿  os_cpu_c.c
-C:\Users\user\Documents\Git\嵌入式作業系統實作HW\20201028_project1\Micrium_Win32_Kernel\Micrium_Win32_Kernel\Micrium\Software\uCOS-II\Source\ucos_ii.h(589,1): warning C4819: 檔案含有無法在目前字碼頁 (950) 中表示的字元。請以 Unicode 格式儲存檔案以防止資料遺失
-  OS2.vcxproj -> C:\Users\user\Documents\Git\嵌入式作業系統實作HW\20201028_project1\Micrium_Win32_Kernel\Micrium_Win32_Kernel\Microsoft\Windows\Kernel\OS2\VS\Debug\OS2.exe
