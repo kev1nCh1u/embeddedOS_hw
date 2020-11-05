@@ -805,6 +805,7 @@ struct KevinPeriodic *kevin_task2_periodic;
 struct KevinPeriodic *kevin_task3_periodic;
 
 INT8U kevin_task_num;
+INT8U kevin_arr_short[4]; // 優先順序
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 

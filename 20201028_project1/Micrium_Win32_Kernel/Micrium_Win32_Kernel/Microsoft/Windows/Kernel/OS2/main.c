@@ -133,12 +133,12 @@ int  main (void)
     kevin_task2_periodic = &kevin_arr_task_periodic[2];
     kevin_task3_periodic = &kevin_arr_task_periodic[3];
 
-    kevin_task1_periodic->arrival = 1;
+    kevin_task1_periodic->arrival = 0;
     kevin_task1_periodic->execution = 1;
     kevin_task1_periodic->period = 3;
 
     kevin_task2_periodic->arrival = 0;
-    kevin_task2_periodic->execution = 4;
+    kevin_task2_periodic->execution = 3;
     kevin_task2_periodic->period = 6;
 
     kevin_task3_periodic->arrival = 1;      // 1
@@ -155,11 +155,12 @@ int  main (void)
         {
             if(kevin_arr_task_periodic[i].period > kevin_arr_task_periodic[j].period)
             {
-                k++;
+                k++; 
             }
         }
         kevin_arr_task_periodic[i].sort = k;
-        // printf("=>task%d short:%d\n", i,kevin_arr_task_periodic[i].sort);
+        kevin_arr_short[k] = i;
+        // printf("=>task%d short:%d short:%d\n", i,kevin_arr_task_periodic[i].sort, kevin_arr_short[k]);
     }
     //////////////////////////////////////////////////////////////////////////
     
@@ -184,21 +185,27 @@ int  main (void)
         0,
         (OS_TASK_OPT_STK_CHK | OS_TASK_OPT_STK_CLR));
 
-    OSTaskCreateExt(task3,
-        0,
-        &Task3_STK[TASK_STACKSIZE - 1],
-        TASK3_PRIORITY,
-        TASK3_ID,
-        &Task3_STK[0],
-        TASK_STACKSIZE,
-        0,
-        (OS_TASK_OPT_STK_CHK | OS_TASK_OPT_STK_CLR));
+    if(kevin_task_num >= 3)
+        OSTaskCreateExt(task3,
+            0,
+            &Task3_STK[TASK_STACKSIZE - 1],
+            TASK3_PRIORITY,
+            TASK3_ID,
+            &Task3_STK[0],
+            TASK_STACKSIZE,
+            0,
+            (OS_TASK_OPT_STK_CHK | OS_TASK_OPT_STK_CLR));
 
     printf("================== TCB linked list ==================\n");
     printf("Task \t Prev_TCB_addr \t TCB_addr \t Next_TCB_addr\n");
     for(int i = kevin_task_num; i > 0; i--)
         printf("%d \t %08X \t %08X \t %08X\n",i, OSTCBPrioTbl[i]->OSTCBPrev, OSTCBPrioTbl[i], OSTCBPrioTbl[i]->OSTCBNext);
-    printf("%d \t %08X \t %08X \t %08X\n",63, OSTCBPrioTbl[63]->OSTCBPrev, OSTCBPrioTbl[63], OSTCBPrioTbl[63]->OSTCBNext);
+    printf("%d \t %08X \t %08X \t %08X\n\n",63, OSTCBPrioTbl[63]->OSTCBPrev, OSTCBPrioTbl[63], OSTCBPrioTbl[63]->OSTCBNext);
+
+    // print task rm
+    for(int i = 1; i <= kevin_task_num; i++)
+        printf("task:%d (%d,%d,%d),", i, kevin_arr_task_periodic[i].arrival,kevin_arr_task_periodic[i].execution,kevin_arr_task_periodic[i].period);
+    printf("\n");
 
     OSTimeSet(0);    // kevin reset time
     OSStart();                                                  /* Start multitasking (i.e. give control to uC/OS-II)   */
