@@ -565,7 +565,7 @@ typedef struct os_stk_data {
 *********************************************************************************************************
 */
 
-typedef struct os_tcb {
+typedef struct os_tcb { // kevin
     OS_STK          *OSTCBStkPtr;           /* Pointer to current top of stack                         */
 
 #if OS_TASK_CREATE_EXT_EN > 0u
