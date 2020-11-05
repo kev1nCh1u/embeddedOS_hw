@@ -88,10 +88,12 @@ static  void  OS_InitTCBList(void);
 
 static  void  OS_SchedNew(void);
 
-/////////////////////////////// kevin /////////////////////////////////////////
+/////////////////////////////// kevin function ////////////////////////////////
 void Kevin_StartContextSwitches(void);
 void Kevin_ContextSwitches(void);
 void Kevin_OS_SchedNew(void);
+void Kevin_OSInit(void);
+void Kevin_print(void);
 //////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -588,6 +590,42 @@ INT16U  OSEventPendMulti (OS_EVENT  **pevents_pend,
 
 void  OSInit (void)
 {
+    //////////////////////////// kevin init/////////////////////////////////////////////////////////////////////////////
+    kevin_task1_periodic = &kevin_arr_task_periodic[1];
+    kevin_task2_periodic = &kevin_arr_task_periodic[2];
+    kevin_task3_periodic = &kevin_arr_task_periodic[3];
+
+    kevin_task1_periodic->arrival = 0;
+    kevin_task1_periodic->execution = 1;
+    kevin_task1_periodic->period = 3;
+
+    kevin_task2_periodic->arrival = 0;
+    kevin_task2_periodic->execution = 3;
+    kevin_task2_periodic->period = 6;
+
+    kevin_task3_periodic->arrival = 1;      // 1
+    kevin_task3_periodic->execution = 1;    // 1
+    kevin_task3_periodic->period = 5;       // 5
+
+    kevin_task_num = 2;
+
+    // kevin sort
+    for(int i = 1; i <= kevin_task_num; i++)
+    {
+        int k = 1;
+        for(int j = 1; j <= kevin_task_num; j++)
+            if(kevin_arr_task_periodic[i].period > kevin_arr_task_periodic[j].period)
+                k++; 
+        kevin_arr_short[k] = i;
+        // printf("=>task%d short:%d short:%d\n", i,kevin_arr_task_periodic[i].sort, kevin_arr_short[k]);
+    }
+
+    // kevin print task rm show
+    for(int i = 1; i <= kevin_task_num; i++)
+        printf("task:%d (%d,%d,%d),", i, kevin_arr_task_periodic[i].arrival,kevin_arr_task_periodic[i].execution,kevin_arr_task_periodic[i].period);
+    printf("\n\n");
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 #if OS_TASK_CREATE_EXT_EN > 0u
 #if defined(OS_TLS_TBL_SIZE) && (OS_TLS_TBL_SIZE > 0u)
     INT8U  err;
@@ -880,7 +918,6 @@ void  OSSchedUnlock (void)
 void  OSStart (void)
 {
     if (OSRunning == OS_FALSE) {
-        // Kevin_StartContextSwitches();
         OS_SchedNew();                               /* Find highest priority's task priority number   */
         OSPrioCur     = OSPrioHighRdy;
         OSTCBHighRdy  = OSTCBPrioTbl[OSPrioHighRdy]; /* Point to highest priority task ready to run    */
@@ -2154,7 +2191,7 @@ INT8U  OS_TCBInit (INT8U    prio,
         OS_TRACE_TASK_READY(ptcb);
         OS_EXIT_CRITICAL();
 
-        /////////////////////////// kevin /////////////////////////////////
+        /////////////////////////// kevin linked list /////////////////////////////////
         printf("-------After TCB[%d] being linked-------\n",ptcb->OSTCBPrio);
         printf("Previous TCB point to address %08X\n", ptcb->OSTCBPrev);
         printf("Current  TCB point to address %08X\n", ptcb);
@@ -2167,15 +2204,35 @@ INT8U  OS_TCBInit (INT8U    prio,
     return (OS_ERR_TASK_NO_MORE_TCB);
 }
 
-///////////////////////////////////// kevin print Context Switches ////////////////////////////////////////////////
+///////////////////////////////////// kevin print function ////////////////////////////////////////////////
 void Kevin_StartContextSwitches(void) {
-   printf("\nTick \t Event \t \t CurrentTask ID \t NextTask ID \t ResponseTime \t # of ContextSwitch \n"); // kevin title
+    // kevin linked list
+    printf("================== TCB linked list ==================\n");
+    printf("Task \t Prev_TCB_addr \t TCB_addr \t Next_TCB_addr\n");
+    for(int i = kevin_task_num; i > 0; i--)
+        printf("%d \t %08X \t %08X \t %08X\n",i, OSTCBPrioTbl[i]->OSTCBPrev, OSTCBPrioTbl[i], OSTCBPrioTbl[i]->OSTCBNext);
+    printf("%d \t %08X \t %08X \t %08X\n\n",63, OSTCBPrioTbl[63]->OSTCBPrev, OSTCBPrioTbl[63], OSTCBPrioTbl[63]->OSTCBNext);
+
+    // kevin rm title
+    printf("\nTick \t Event \t \t CurrentTask ID \t NextTask ID \t ResponseTime \t # of ContextSwitch \n"); // kevin title
 }
 
 void Kevin_ContextSwitches(void) {
+    /************ context counting  *****************************************************************/
+    for(int i = 1; i <= kevin_task_num; i++) // 每個 task
+    {
+        if(kevin_arr_task_periodic[i].work < kevin_arr_task_periodic[i].execution || OSPrioHighRdy == i) // 當這task開始做
+        {
+            kevin_arr_task_periodic[i].context++; // counter
+            // printf("task:%d work:%d\n", i, kevin_arr_task_periodic[i].work);
+        }
+    }
+    /*************************************************************************************************/
+
     /******************************** print **************************************************************/
     printf("%d \t ",OSTime);
 
+    // Event
     if(kevin_arr_task_periodic[OSTCBCur->OSTCBPrio].work == 0 && OSTCBCur->OSTCBPrio != 63)
         printf("Completion \t ");
     else if (kevin_arr_task_periodic[OSTCBCur->OSTCBPrio].work >= kevin_arr_task_periodic[OSTCBCur->OSTCBPrio].execution && OSTCBCur->OSTCBPrio != 63)
@@ -2186,15 +2243,18 @@ void Kevin_ContextSwitches(void) {
     else
         printf("Preemption \t ");
     
+    // CurrentTask ID
     printf("task(%d)",OSTCBCur->OSTCBPrio);
     if(OSTCBCur->OSTCBPrio != 63)
         printf("(%d) ", kevin_arr_task_periodic[OSTCBCur->OSTCBPrio].job);
     printf("\t \t ");
 
+    // NextTask ID
     printf("task(%d)",OSTCBHighRdy->OSTCBPrio);
     if(OSTCBHighRdy->OSTCBPrio != 63)
         printf("(%d) ", kevin_arr_task_periodic[OSTCBHighRdy->OSTCBPrio].job);
-
+    
+    // ResponseTime ContextSwitch
     if(kevin_arr_task_periodic[OSTCBCur->OSTCBPrio].work == 0 && OSTCBCur->OSTCBPrio != 63)
     {
         printf("\t \t %d \t \t %d ", kevin_arr_task_periodic[OSTCBCur->OSTCBPrio].response, kevin_arr_task_periodic[OSTCBCur->OSTCBPrio].context);
@@ -2203,55 +2263,41 @@ void Kevin_ContextSwitches(void) {
     printf("\n");
     /******************************************************************************************************/
 
-    /************ context counting  *****************************************************************/
-    for(int i = 1; i <= kevin_task_num; i++)
-    {
-        if(kevin_arr_task_periodic[i].work < kevin_arr_task_periodic[i].execution || OSPrioHighRdy == i)
-        {
-            kevin_arr_task_periodic[i].context++;
-            // printf("task:%d work:%d\n", i, kevin_arr_task_periodic[i].work);
-        } 
-    }
-    /*************************************************************************************************/
+
 }
 
 void Kevin_OS_SchedNew(void) {
     
     // counter
-    if (OSPrioHighRdy <= kevin_task_num && OSTime != 0) 
+    if (OSPrioHighRdy <= kevin_task_num && OSTime != 0) // 排除 idle 跟開始
     {
-        kevin_arr_task_periodic[OSPrioHighRdy].work--; // counter
+        kevin_arr_task_periodic[OSPrioHighRdy].work--; // 計算execution被做掉了幾次
     }
 
     // periodic plus work
-    for(int i = 1; i <= kevin_task_num; i++)
+    for(int i = 1; i <= kevin_task_num; i++) // 每個 task
     {
-        kevin_arr_task_periodic[i].response++; // counter
+        kevin_arr_task_periodic[i].response++; // counter 紀錄從週期開始響應時間
 
         // periodic plus work
-        int kevin_OSTime_arrival = (OSTime - kevin_arr_task_periodic[i].arrival);
-        if(kevin_OSTime_arrival >= 0 && kevin_OSTime_arrival % kevin_arr_task_periodic[i].period  == 0)
+        int kevin_OSTime_arrival = (OSTime - kevin_arr_task_periodic[i].arrival); // arrival
+        if(kevin_OSTime_arrival >= 0 && kevin_OSTime_arrival % kevin_arr_task_periodic[i].period  == 0) // 排除0取餘數 找到週期
         {
-            kevin_arr_task_periodic[i].work += kevin_arr_task_periodic[i].execution;
+            kevin_arr_task_periodic[i].work += kevin_arr_task_periodic[i].execution; // 發工作
             kevin_arr_task_periodic[i].response = 0;
-            kevin_arr_task_periodic[i].context = 1;
+            kevin_arr_task_periodic[i].context = 0;
         }
         // printf("task:%d OSTime:%d %d work:%d\n", i,(OSTime - kevin_arr_task_periodic[i].arrival), (OSTime - kevin_arr_task_periodic[i].arrival) % kevin_arr_task_periodic[i].period,kevin_arr_task_periodic[i].work);
     }
     
     // find OSPrioHighRdy
-    OSPrioHighRdy = 63; // find OSPrioHighRdy
-    for(int i = 1; i <= kevin_task_num; i++)
+    OSPrioHighRdy = 63; // find OSPrioHighRdy 先假設沒人要做事
+    for(int i = 1; i <= kevin_task_num; i++) // 每個 task
     {
-        // find OSPrioHighRdy
-        if(kevin_arr_task_periodic[kevin_arr_short[i]].sort == i)
+        if (kevin_arr_task_periodic[kevin_arr_short[i]].work != 0) // 從 週期短 高優先 開始找有事做的
         {
-            if (kevin_arr_task_periodic[kevin_arr_short[i]].work != 0)
-            {
-                OSPrioHighRdy = kevin_arr_short[i];
-                i = kevin_task_num;
-                break;
-            }
+            OSPrioHighRdy = kevin_arr_short[i];
+            break;
         }
     }
 

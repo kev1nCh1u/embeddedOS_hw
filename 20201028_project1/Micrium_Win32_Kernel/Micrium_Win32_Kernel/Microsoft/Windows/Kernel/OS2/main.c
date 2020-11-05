@@ -48,9 +48,9 @@
 */
 
 #define TASK_STACKSIZE   2048
-#define TASK1_PRIORITY   1
-#define TASK2_PRIORITY   2
-#define TASK3_PRIORITY   3
+#define TASK1_PRIORITY   1      // kevin 設多少都沒差後面會改
+#define TASK2_PRIORITY   2      // kevin 設多少都沒差後面會改
+#define TASK3_PRIORITY   3      // kevin 設多少都沒差後面會改
 #define TASK1_ID         1
 #define TASK2_ID         2
 #define TASK3_ID         3
@@ -77,7 +77,7 @@ static  void  StartupTask (void  *p_arg);
 
 static void task1(void* p_arg);
 static void task2(void* p_arg);
-static void task3(void* p_arg);
+static void task3(void* p_arg); // kevin
 
 /*
 *********************************************************************************************************
@@ -109,8 +109,6 @@ int  main (void)
 
     OSInit();                                                   /* Initialize uC/OS-II                                  */
 
-        
-
                                                                 /*
     OSTaskCreateExt( StartupTask,                               // Create the startup task                              
                      0,
@@ -127,44 +125,7 @@ int  main (void)
                   (INT8U *)"Startup Task",
                            &os_err);
 #endif
-*/
-    //////////////////////////// kevin /////////////////////////////////////////////
-    kevin_task1_periodic = &kevin_arr_task_periodic[1];
-    kevin_task2_periodic = &kevin_arr_task_periodic[2];
-    kevin_task3_periodic = &kevin_arr_task_periodic[3];
-
-    kevin_task1_periodic->arrival = 0;
-    kevin_task1_periodic->execution = 1;
-    kevin_task1_periodic->period = 3;
-
-    kevin_task2_periodic->arrival = 0;
-    kevin_task2_periodic->execution = 3;
-    kevin_task2_periodic->period = 6;
-
-    kevin_task3_periodic->arrival = 1;      // 1
-    kevin_task3_periodic->execution = 1;    // 1
-    kevin_task3_periodic->period = 5;       // 5
-
-    kevin_task_num = 2;
-
-    // kevin sort
-    for(int i = 1; i <= kevin_task_num; i++)
-    {
-        int k = 1;
-        for(int j = 1; j <= kevin_task_num; j++)
-        {
-            if(kevin_arr_task_periodic[i].period > kevin_arr_task_periodic[j].period)
-            {
-                k++; 
-            }
-        }
-        kevin_arr_task_periodic[i].sort = k;
-        kevin_arr_short[k] = i;
-        // printf("=>task%d short:%d short:%d\n", i,kevin_arr_task_periodic[i].sort, kevin_arr_short[k]);
-    }
-    //////////////////////////////////////////////////////////////////////////
-    
-
+*/  
     OSTaskCreateExt(task1,
         0,
         &Task1_STK[TASK_STACKSIZE - 1],
@@ -185,7 +146,7 @@ int  main (void)
         0,
         (OS_TASK_OPT_STK_CHK | OS_TASK_OPT_STK_CLR));
 
-    if(kevin_task_num >= 3)
+    if(kevin_task_num >= 3) // kevin
         OSTaskCreateExt(task3,
             0,
             &Task3_STK[TASK_STACKSIZE - 1],
@@ -195,17 +156,6 @@ int  main (void)
             TASK_STACKSIZE,
             0,
             (OS_TASK_OPT_STK_CHK | OS_TASK_OPT_STK_CLR));
-
-    printf("================== TCB linked list ==================\n");
-    printf("Task \t Prev_TCB_addr \t TCB_addr \t Next_TCB_addr\n");
-    for(int i = kevin_task_num; i > 0; i--)
-        printf("%d \t %08X \t %08X \t %08X\n",i, OSTCBPrioTbl[i]->OSTCBPrev, OSTCBPrioTbl[i], OSTCBPrioTbl[i]->OSTCBNext);
-    printf("%d \t %08X \t %08X \t %08X\n\n",63, OSTCBPrioTbl[63]->OSTCBPrev, OSTCBPrioTbl[63], OSTCBPrioTbl[63]->OSTCBNext);
-
-    // print task rm
-    for(int i = 1; i <= kevin_task_num; i++)
-        printf("task:%d (%d,%d,%d),", i, kevin_arr_task_periodic[i].arrival,kevin_arr_task_periodic[i].execution,kevin_arr_task_periodic[i].period);
-    printf("\n");
 
     OSTimeSet(0);    // kevin reset time
     OSStart();                                                  /* Start multitasking (i.e. give control to uC/OS-II)   */
@@ -258,7 +208,7 @@ void task1(void* p_arg) {
     (void)p_arg;
     while (1) {
         //printf("Hello from task1\n");
-        while (1);
+        while (1); // kevin 讓他一直卡在裡面 靠OSintexit來切
     }
 }
 
@@ -266,7 +216,7 @@ void task2(void* p_arg) {
     (void)p_arg;
     while (1) {
         //printf("Hello from task2\n");
-        while (1);
+        while (1); // kevin 讓他一直卡在裡面 靠OSintexit來切
     }
 }
 
@@ -274,6 +224,6 @@ void task3(void* p_arg) {
     (void)p_arg;
     while (1) {
         //printf("Hello from task3\n");
-        while (1);
+        while (1); // kevin 讓他一直卡在裡面 靠OSintexit來切
     }
 }
