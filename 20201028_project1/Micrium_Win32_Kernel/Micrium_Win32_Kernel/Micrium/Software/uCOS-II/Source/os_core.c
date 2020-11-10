@@ -2214,12 +2214,13 @@ void Kevin_OS_SchedNew(void) {
         int kevin_OSTime_arrival = (OSTime - kevin_arr_task_periodic[i].arrival); // arrival
         if(kevin_OSTime_arrival >= 0 && kevin_OSTime_arrival % kevin_arr_task_periodic[i].period  == 0) // 排除0取餘數 找到週期
         {
-            if(OSPrioHighRdy == i && kevin_arr_task_periodic[i].work == 0) // 做完了但接著做 不會進context 所以在這job++ 印出來
-                printf("%d \t Completion \t task(%d)(%d) \t \t task(%d)(%d) \t \t %d \t \t %d \n "
+            if(OSPrioHighRdy == i && kevin_arr_task_periodic[i].work == 0){ // 做完了但接著做 不會進context 所以在這job++ 印出來
+                printf("%d \t Completion \t task(%d)(%d) \t \t task(%d)(%d) \t \t %d \t \t %d \n"
                 , OSTime, OSPrioHighRdy,kevin_arr_task_periodic[OSPrioHighRdy].job++, OSPrioHighRdy, kevin_arr_task_periodic[OSPrioHighRdy].job, kevin_arr_task_periodic[OSPrioHighRdy].response, kevin_arr_task_periodic[OSPrioHighRdy].context); // kevin
-            
+                // kevin_arr_task_periodic[OSPrioHighRdy].job++; // 或是不列印純job++
+            }
             if(kevin_arr_task_periodic[i].work != 0){ // 發工作時發現miss
-                printf("%d \t MissDeadline \t task(%d)(%d) \t \t -------------------\n ", OSTime, i, kevin_arr_task_periodic[i].job);
+                printf("%d \t MissDeadline \t task(%d)(%d) \t \t -------------------\n", OSTime, i, kevin_arr_task_periodic[i].job);
                 while (1);
             }
             kevin_arr_task_periodic[i].work += kevin_arr_task_periodic[i].execution; // 發工作
@@ -2249,19 +2250,19 @@ void Kevin_OSInit(void){
     kevin_task2_periodic = &kevin_arr_task_periodic[2];
     kevin_task3_periodic = &kevin_arr_task_periodic[3];
 
-    kevin_task1_periodic->arrival = 0;
-    kevin_task1_periodic->execution = 4;
-    kevin_task1_periodic->period = 6;
+    kevin_task1_periodic->arrival = 1;
+    kevin_task1_periodic->execution = 1;
+    kevin_task1_periodic->period = 3;
 
-    kevin_task2_periodic->arrival = 2;
-    kevin_task2_periodic->execution = 2;
-    kevin_task2_periodic->period = 10;
+    kevin_task2_periodic->arrival = 0;
+    kevin_task2_periodic->execution = 4;
+    kevin_task2_periodic->period = 6;
 
     kevin_task3_periodic->arrival = 1;      // 1
     kevin_task3_periodic->execution = 1;    // 1
     kevin_task3_periodic->period = 5;       // 5
 
-    kevin_task_num = 3;
+    kevin_task_num = 2;
 
     // kevin sort
     for(int i = 1; i <= kevin_task_num; i++)
@@ -2289,7 +2290,7 @@ void Kevin_print(void){
         printf("Completion \t ");
     else if (kevin_arr_task_periodic[OSTCBCur->OSTCBPrio].work >= kevin_arr_task_periodic[OSTCBCur->OSTCBPrio].execution && OSTCBCur->OSTCBPrio != 63) // context 時發現 miss
     {
-        printf("MissDeadline \t task(%d)(%d) \t \t -------------------\n ", OSTCBCur->OSTCBPrio, kevin_arr_task_periodic[OSTCBCur->OSTCBPrio].job);
+        printf("MissDeadline \t task(%d)(%d) \t \t -------------------\n", OSTCBCur->OSTCBPrio, kevin_arr_task_periodic[OSTCBCur->OSTCBPrio].job);
         while (1);
     }
     else
