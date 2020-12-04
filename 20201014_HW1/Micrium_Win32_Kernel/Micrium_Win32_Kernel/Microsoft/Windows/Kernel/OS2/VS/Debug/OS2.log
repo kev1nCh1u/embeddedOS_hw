@@ -1,3 +1,0 @@
-﻿  main.c
-C:\Users\user\Documents\Git\嵌入式作業系統實作HW\20201014_HW1\Micrium_Win32_Kernel\Micrium_Win32_Kernel\Microsoft\Windows\Kernel\OS2\main.c(97,17): warning C4101: 'os_err': 未參考的區域變數
-  OS2.vcxproj -> C:\Users\user\Documents\Git\嵌入式作業系統實作HW\20201014_HW1\Micrium_Win32_Kernel\Micrium_Win32_Kernel\Microsoft\Windows\Kernel\OS2\VS\Debug\OS2.exe
