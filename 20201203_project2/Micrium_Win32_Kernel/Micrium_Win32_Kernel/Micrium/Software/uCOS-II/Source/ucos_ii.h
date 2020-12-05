@@ -791,10 +791,13 @@ struct KevinPeriodic {
     INT8U arrival;      // 開始時間
     INT8U execution;    // 每次工作量
     INT8U period;       // 週期期限
+
+    INT8U work;         // 紀錄當前工作
+    INT8U deadline;     // 紀錄工作期限
+
     INT8U job;          // 紀錄工作幾輪
     INT8U response;     // 紀錄所花時間
     INT8U context;      // 紀錄切換次數
-    INT8U work;         // 紀錄當前工作
 };
 
 struct KevinPeriodic kevin_arr_task_periodic[4];
