@@ -2188,11 +2188,11 @@ void Kevin_ContextSwitches(void) {
     // context counting
     for(int i = 1; i <= kevin_task_num; i++) // 每個 task
     {
-        // if(kevin_arr_task_periodic[i].work < kevin_arr_task_periodic[i].execution || OSPrioHighRdy == i) // 當這task開始做
-        // {
+        if(kevin_arr_task_periodic[i].work < kevin_arr_task_periodic[i].execution || OSPrioHighRdy == i) // 當這task開始做
+        {
             kevin_arr_task_periodic[i].context++; // counter
             // printf("task:%d work:%d\n", i, kevin_arr_task_periodic[i].work);
-        // }
+        }
     }
 
     // print
