@@ -207,7 +207,7 @@ static  void  StartupTask (void *p_arg)
 void task1(void* p_arg) {
     (void)p_arg;
     while (1) {
-        //printf("Hello from task1\n");
+        // printf("Hello from task1\n");
         while (1); // kevin 讓他一直卡在裡面 靠OSintexit來切
     }
 }
@@ -215,7 +215,7 @@ void task1(void* p_arg) {
 void task2(void* p_arg) {
     (void)p_arg;
     while (1) {
-        //printf("Hello from task2\n");
+        // printf("Hello from task2\n");
         while (1); // kevin 讓他一直卡在裡面 靠OSintexit來切
     }
 }
@@ -223,7 +223,7 @@ void task2(void* p_arg) {
 void task3(void* p_arg) {
     (void)p_arg;
     while (1) {
-        //printf("Hello from task3\n");
+        // printf("Hello from task3\n");
         while (1); // kevin 讓他一直卡在裡面 靠OSintexit來切
     }
 }
