@@ -2204,13 +2204,13 @@ void Kevin_OS_SchedNew(void) {
         int kevin_OSTime_arrival = (OSTime - kevin_arr_task_periodic[i].arrival); // arrival
         if(kevin_OSTime_arrival >= 0 && kevin_OSTime_arrival % kevin_arr_task_periodic[i].period  == 0) // 排除0取餘數 找到週期
         {
-            if(!(kevin_arr_task_periodic[i].work == 0 && OSPrioHighRdy == i))
+            if(!(kevin_arr_task_periodic[i].work == 0 && OSPrioHighRdy == i)) // 當前的工作沒被發工作
             {
                 kevin_arr_task_periodic[i].response = 0;
                 kevin_arr_task_periodic[i].context = 0;
             }
             kevin_arr_task_periodic[i].work += kevin_arr_task_periodic[i].execution; // 發工作
-            kevin_arr_task_periodic[i].deadline = OSTime + kevin_arr_task_periodic[i].period;
+            kevin_arr_task_periodic[i].deadline = OSTime + kevin_arr_task_periodic[i].period; // 期限
         }
         // debug print
         // printf("%d \t task:%d arrival:%d work:%d\n",OSTime, i, (OSTime - kevin_arr_task_periodic[i].arrival) % kevin_arr_task_periodic[i].period,kevin_arr_task_periodic[i].work);
@@ -2252,19 +2252,19 @@ void Kevin_OSInit(void){
     kevin_task2_periodic = &kevin_arr_task_periodic[2];
     kevin_task3_periodic = &kevin_arr_task_periodic[3];
 
-    kevin_task1_periodic->arrival = 0;
-    kevin_task1_periodic->execution = 2;
-    kevin_task1_periodic->period = 4;
+    kevin_task1_periodic->arrival =     0;
+    kevin_task1_periodic->execution =   1;
+    kevin_task1_periodic->period =      4;
 
-    kevin_task2_periodic->arrival = 0;
-    kevin_task2_periodic->execution = 5;
-    kevin_task2_periodic->period = 10;
+    kevin_task2_periodic->arrival =     0;
+    kevin_task2_periodic->execution =   3;
+    kevin_task2_periodic->period =      6;
 
-    kevin_task3_periodic->arrival = 1;      // 1
-    kevin_task3_periodic->execution = 1;    // 1
-    kevin_task3_periodic->period = 5;       // 5
+    kevin_task3_periodic->arrival =     1;      // 1
+    kevin_task3_periodic->execution =   1;      // 1
+    kevin_task3_periodic->period =      3;      // 5
 
-    kevin_task_num = 2;
+    kevin_task_num = 3;
 
     // kevin print task seting show
     for(int i = 1; i <= kevin_task_num; i++)
