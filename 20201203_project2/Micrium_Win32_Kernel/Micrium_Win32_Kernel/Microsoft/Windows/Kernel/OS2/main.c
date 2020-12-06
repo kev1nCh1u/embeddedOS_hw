@@ -51,9 +51,11 @@
 #define TASK1_PRIORITY   1      // kevin 設多少都沒差後面會改
 #define TASK2_PRIORITY   2      // kevin 設多少都沒差後面會改
 #define TASK3_PRIORITY   3      // kevin 設多少都沒差後面會改
+#define TASK4_PRIORITY   4      // kevin 設多少都沒差後面會改
 #define TASK1_ID         1
 #define TASK2_ID         2
 #define TASK3_ID         3
+#define TASK4_ID         4
 
 /*
 *********************************************************************************************************
@@ -66,6 +68,7 @@ static  OS_STK  StartupTaskStk[APP_CFG_STARTUP_TASK_STK_SIZE];
 static  OS_STK  Task1_STK[TASK_STACKSIZE];
 static  OS_STK  Task2_STK[TASK_STACKSIZE];
 static  OS_STK  Task3_STK[TASK_STACKSIZE];
+static  OS_STK  Task4_STK[TASK_STACKSIZE];
 
 /*
 *********************************************************************************************************
@@ -78,6 +81,7 @@ static  void  StartupTask (void  *p_arg);
 static void task1(void* p_arg);
 static void task2(void* p_arg);
 static void task3(void* p_arg); // kevin
+static void task4(void* p_arg); // kevin
 
 /*
 *********************************************************************************************************
@@ -156,6 +160,16 @@ int  main (void)
             TASK_STACKSIZE,
             0,
             (OS_TASK_OPT_STK_CHK | OS_TASK_OPT_STK_CLR));
+    if(kevin_task_num >= 4) // kevin
+        OSTaskCreateExt(task4,
+            0,
+            &Task4_STK[TASK_STACKSIZE - 1],
+            TASK4_PRIORITY,
+            TASK4_ID,
+            &Task4_STK[0],
+            TASK_STACKSIZE,
+            0,
+            (OS_TASK_OPT_STK_CHK | OS_TASK_OPT_STK_CLR));
 
     OSTimeSet(0);    // kevin reset time
     OSStart();                                                  /* Start multitasking (i.e. give control to uC/OS-II)   */
@@ -224,6 +238,14 @@ void task3(void* p_arg) {
     (void)p_arg;
     while (1) {
         // printf("Hello from task3\n");
+        while (1); // kevin 讓他一直卡在裡面 靠OSintexit來切
+    }
+}
+
+void task4(void* p_arg) {
+    (void)p_arg;
+    while (1) {
+        // printf("Hello from task4\n");
         while (1); // kevin 讓他一直卡在裡面 靠OSintexit來切
     }
 }

@@ -799,15 +799,28 @@ struct KevinPeriodic {
     INT8U response;     // 紀錄所花時間
     INT8U context;      // 紀錄切換次數
 };
-
-struct KevinPeriodic kevin_arr_task_periodic[4];
-
+struct KevinPeriodic kevin_arr_task_periodic[5];
 struct KevinPeriodic *kevin_task1_periodic;
 struct KevinPeriodic *kevin_task2_periodic;
 struct KevinPeriodic *kevin_task3_periodic;
+struct KevinPeriodic *kevin_task4_periodic;
+
+struct KevinAperiodic {
+    INT8U arrival;      // 開始時間
+    INT8U execution;    // 每次工作量
+    INT8U period;       // 週期期限
+
+    INT8U work;         // 紀錄當前工作
+    INT8U deadline;     // 紀錄工作期限
+
+    INT8U job;          // 紀錄工作幾輪
+    INT8U response;     // 紀錄所花時間
+    INT8U context;      // 紀錄切換次數
+};
+struct KevinAperiodic kevin_arr_aperiodic[2];
 
 INT8U kevin_task_num;
-INT8U kevin_arr_short[4]; // 優先順序
+INT8U kevin_aperiodic_num;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
