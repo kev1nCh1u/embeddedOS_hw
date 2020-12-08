@@ -2201,7 +2201,7 @@ void Kevin_OS_SchedNew(void) {
         kevin_arr_task_periodic[i].response++; // counter 紀錄從週期開始響應時間
 
         // periodic plus work
-        if(kevin_arr_task_periodic[i].execution)
+        if(kevin_arr_task_periodic[i].execution && kevin_aperiodic_flag)
         {
             int kevin_OSTime_arrival = (OSTime - kevin_arr_task_periodic[i].arrival); // arrival
             if(kevin_OSTime_arrival >= 0 && kevin_OSTime_arrival % kevin_arr_task_periodic[i].period  == 0) // 排除0取餘數 找到週期
@@ -2236,7 +2236,18 @@ void Kevin_OS_SchedNew(void) {
             }
             // calculate aperiodic deadline
             kevin_arr_aperiodic[i].deadline = t + kevin_arr_aperiodic[i].execution / kevin_aperiodic_us;
-            printf("j%d deadline:%d \n", i, kevin_arr_aperiodic[i].deadline);
+            printf("Aperiodic job (%d) sets CUS server's deadline as %d.\n", i, kevin_arr_aperiodic[i].deadline);
+        }
+        if(kevin_arr_aperiodic[i].arrival == OSTime)
+        {
+            kevin_arr_task_periodic[kevin_task_num].arrival = kevin_arr_aperiodic[i].arrival;
+            kevin_arr_task_periodic[kevin_task_num].execution = kevin_arr_aperiodic[i].execution;
+            kevin_arr_task_periodic[kevin_task_num].period = kevin_arr_aperiodic[i].period;
+            kevin_arr_task_periodic[kevin_task_num].response = 0;
+            kevin_arr_task_periodic[kevin_task_num].context = 0;
+            kevin_arr_task_periodic[kevin_task_num].work = kevin_arr_aperiodic[i].execution;
+            kevin_arr_task_periodic[kevin_task_num].deadline = kevin_arr_aperiodic[i].deadline;
+            
         }
     }
     
@@ -2256,6 +2267,7 @@ void Kevin_OS_SchedNew(void) {
             }
         }
     }
+
 
     // check if same task gonna continue
     for(int i = 1; i <= kevin_task_num; i++)
@@ -2304,7 +2316,11 @@ void Kevin_OSInit(void){
     kevin_task_num = 4;
     kevin_aperiodic_num = 2;
     kevin_aperiodic_us = 0.3;
-
+    if(kevin_aperiodic_num)
+        kevin_aperiodic_flag = 1;
+    else
+        kevin_aperiodic_flag = 0;
+    
     // kevin print task seting show
     for(int i = 1; i <= kevin_task_num; i++)
         printf("t%d(%d,%d,%d),", i, kevin_arr_task_periodic[i].arrival,kevin_arr_task_periodic[i].execution,kevin_arr_task_periodic[i].period);
