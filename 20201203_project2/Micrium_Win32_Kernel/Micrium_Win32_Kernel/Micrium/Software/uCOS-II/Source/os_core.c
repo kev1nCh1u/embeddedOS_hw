@@ -2178,7 +2178,7 @@ void Kevin_ContextSwitches(void) {
     // context counting
     for(int i = 1; i <= kevin_task_num; i++) // 每個 task
     {
-        if(kevin_arr_task_periodic[i].work < kevin_arr_task_periodic[i].execution || (kevin_arr_task_periodic[i].work == kevin_arr_task_periodic[i].execution && OSPrioHighRdy == i)) // 當這task開始做
+        if(kevin_arr_task_periodic[i].work < kevin_arr_task_periodic[i].execution || (kevin_arr_task_periodic[i].work == kevin_arr_task_periodic[i].execution && OSPrioHighRdy == i)) // 當這task 有工作 開始做
         {
             kevin_arr_task_periodic[i].context++; // counter
             // printf("task:%d work:%d\n", i, kevin_arr_task_periodic[i].work);
@@ -2225,20 +2225,20 @@ void Kevin_OS_SchedNew(void) {
     {
         if(kevin_arr_aperiodic[i].arrival == OSTime)
         {   
-            // find max
-            int t = t = kevin_arr_aperiodic[i].arrival;
-            if(i)
-            {   
-                if(kevin_arr_aperiodic[i-1].deadline >= kevin_arr_aperiodic[i].arrival)
+            // find max of last_d and t
+            int t = kevin_arr_aperiodic[i].arrival; // assume t is max
+            if(i) // i > 0 have last_d
+            {
+                if(kevin_arr_aperiodic[i-1].deadline >= t) // last_d max than t
                 {
                     t = kevin_arr_aperiodic[i-1].deadline;
                 }
             }
             // calculate aperiodic deadline
             kevin_arr_aperiodic[i].deadline = t + kevin_arr_aperiodic[i].execution / kevin_aperiodic_us;
-            printf("Aperiodic job (%d) sets CUS server's deadline as %d.\n", i, kevin_arr_aperiodic[i].deadline);
+            printf("%d \t Aperiodic job (%d) sets CUS server's deadline as %d.\n", OSTime, i, kevin_arr_aperiodic[i].deadline);
         }
-        if(kevin_arr_aperiodic[i].arrival == OSTime)
+        if(kevin_arr_aperiodic[i].arrival <= OSTime && kevin_arr_task_periodic[kevin_task_num].deadline == 0)
         {
             kevin_arr_task_periodic[kevin_task_num].arrival = kevin_arr_aperiodic[i].arrival;
             kevin_arr_task_periodic[kevin_task_num].execution = kevin_arr_aperiodic[i].execution;
@@ -2247,8 +2247,13 @@ void Kevin_OS_SchedNew(void) {
             kevin_arr_task_periodic[kevin_task_num].context = 0;
             kevin_arr_task_periodic[kevin_task_num].work = kevin_arr_aperiodic[i].execution;
             kevin_arr_task_periodic[kevin_task_num].deadline = kevin_arr_aperiodic[i].deadline;
-            
+            kevin_arr_task_periodic[kevin_task_num].aperiodic_job_num = i;
         }
+        else if(kevin_arr_aperiodic[i].arrival == OSTime)
+        {
+            printf("%d \t Aperiodic job (%d) arrives. Do nothing. \n",OSTime ,i);
+        }
+        
     }
     
     // find OSPrioHighRdy
@@ -2337,6 +2342,15 @@ void Kevin_OSInit(void){
 
 void Kevin_print(void){
     unsigned int eventFlag = 0;
+    
+    // aperiodic finish
+    if(kevin_arr_task_periodic[kevin_task_num].execution && kevin_arr_task_periodic[kevin_task_num].work == 0)
+    {
+        printf("%d \t ",OSTime);
+        printf("Aperiodic job (%d) is finished. \n", kevin_arr_task_periodic[kevin_task_num].aperiodic_job_num);
+        kevin_arr_task_periodic[kevin_task_num].execution = 0;
+        kevin_arr_aperiodic[kevin_arr_task_periodic[kevin_task_num].aperiodic_job_num] = EmptyStruct;
+    }
 
     // tick
     printf("%d \t ",OSTime);
@@ -2381,6 +2395,12 @@ void Kevin_end(void){
         printf("%d \t MissDeadline \t task(%d)(%d) \t \t -------------------\n", OSTime, i, kevin_arr_task_periodic[i].job);
         while (1);
         }
+    }
+    if(kevin_aperiodic_flag && kevin_arr_task_periodic[kevin_task_num].deadline == OSTime)
+    {
+        kevin_arr_task_periodic[kevin_task_num].arrival = 0;
+        kevin_arr_task_periodic[kevin_task_num].period = 0;
+        kevin_arr_task_periodic[kevin_task_num].deadline = 0;
     }
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
