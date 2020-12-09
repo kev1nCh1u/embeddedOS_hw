@@ -814,7 +814,6 @@ static const struct KevinPeriodic EmptyStruct;
 INT8U kevin_task_num;
 INT8U kevin_aperiodic_num;
 float kevin_aperiodic_us;
-INT8U kevin_aperiodic_flag;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
