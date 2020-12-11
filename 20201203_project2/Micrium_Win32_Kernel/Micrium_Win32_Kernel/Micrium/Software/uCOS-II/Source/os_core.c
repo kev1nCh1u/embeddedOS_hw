@@ -2201,7 +2201,7 @@ void Kevin_OSInit(void){
 
     kevin_task_num =        4;
     kevin_aperiodic_num =   2;
-    kevin_aperiodic_us =    0.3;
+    kevin_aperiodic_us =    0.2;
     
     // kevin print task seting show
     for(int i = 1; i <= kevin_task_num; i++)
