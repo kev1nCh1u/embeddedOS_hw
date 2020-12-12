@@ -67,8 +67,8 @@ static  OS_STK  StartupTaskStk[APP_CFG_STARTUP_TASK_STK_SIZE];
 
 static  OS_STK  Task1_STK[TASK_STACKSIZE];
 static  OS_STK  Task2_STK[TASK_STACKSIZE];
-static  OS_STK  Task3_STK[TASK_STACKSIZE];
-static  OS_STK  Task4_STK[TASK_STACKSIZE];
+static  OS_STK  Task3_STK[TASK_STACKSIZE];  // kevin
+static  OS_STK  Task4_STK[TASK_STACKSIZE];  // kevin
 
 /*
 *********************************************************************************************************

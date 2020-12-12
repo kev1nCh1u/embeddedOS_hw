@@ -48,7 +48,7 @@
 #define OS_SCHED_LOCK_EN          1u   /* Include code for OSSchedLock() and OSSchedUnlock()           */
 
 #define OS_TICK_STEP_EN           1u   /* Enable tick stepping feature for uC/OS-View                  */
-#define OS_TICKS_PER_SEC         20u   /* Set the number of ticks in one second                        */
+#define OS_TICKS_PER_SEC         20u   /* Set the number of ticks in one second                        */   // kevin
 
 #define OS_TLS_TBL_SIZE           0u   /* Size of Thread-Local Storage Table                           */
 
@@ -68,7 +68,7 @@
 #define OS_TASK_PROFILE_EN        1u   /*     Include variables in OS_TCB for profiling                */
 #define OS_TASK_QUERY_EN          1u   /*     Include code for OSTaskQuery()                           */
 #define OS_TASK_REG_TBL_SIZE      1u   /*     Size of task variables array (#of INT32U entries)        */
-#define OS_TASK_STAT_EN           0u   /*     Enable (1) or Disable(0) the statistics task             */ // kevin
+#define OS_TASK_STAT_EN           0u   /*     Enable (1) or Disable(0) the statistics task             */   // kevin
 #define OS_TASK_STAT_STK_CHK_EN   1u   /*     Check task stacks from statistic task                    */
 #define OS_TASK_SUSPEND_EN        1u   /*     Include code for OSTaskSuspend() and OSTaskResume()      */
 #define OS_TASK_SW_HOOK_EN        1u   /*     Include code for OSTaskSwHook()                          */

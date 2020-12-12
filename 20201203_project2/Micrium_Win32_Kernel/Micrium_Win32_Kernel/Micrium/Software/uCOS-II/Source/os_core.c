@@ -887,7 +887,7 @@ void  OSSchedUnlock (void)
 void  OSStart (void)
 {
     if (OSRunning == OS_FALSE) {
-        Kevin_StartContextSwitches();
+        Kevin_StartContextSwitches(); // kevin
         OS_SchedNew();                               /* Find highest priority's task priority number   */
         OSPrioCur     = OSPrioHighRdy;
         OSTCBHighRdy  = OSTCBPrioTbl[OSPrioHighRdy]; /* Point to highest priority task ready to run    */
@@ -2246,17 +2246,17 @@ void Kevin_OS_SchedNew(void) {
         kevin_arr_task_periodic[i].response++; // counter 紀錄從週期開始響應時間
 
         // periodic plus work
-        if(kevin_arr_task_periodic[i].execution)
+        if(kevin_arr_task_periodic[i].execution) // 有規劃工作
         {
             int kevin_OSTime_arrival = (OSTime - kevin_arr_task_periodic[i].arrival); // arrival
             if(kevin_OSTime_arrival >= 0 && kevin_OSTime_arrival % kevin_arr_task_periodic[i].period  == 0) // 排除0取餘數 找到週期
             {
                 if(!(kevin_arr_task_periodic[i].work == 0 && OSPrioHighRdy == i)) // 當前的工作沒被發工作
                 {
-                    kevin_arr_task_periodic[i].response = 0;
-                    kevin_arr_task_periodic[i].context = 0;
+                    kevin_arr_task_periodic[i].response = 0; // 響應時間歸零
+                    kevin_arr_task_periodic[i].context = 0; // 切換次數歸零
                 }
-                if(kevin_arr_task_periodic[i].work == 0)
+                if(kevin_arr_task_periodic[i].work == 0) // 工作做完了
                     kevin_arr_task_periodic[i].deadline = OSTime + kevin_arr_task_periodic[i].period; // 期限
                 kevin_arr_task_periodic[i].work += kevin_arr_task_periodic[i].execution; // 發工作
             }
@@ -2264,9 +2264,9 @@ void Kevin_OS_SchedNew(void) {
     }
 
     // aperiodic deadline
-    for(int i = 0; i < kevin_aperiodic_num; i++)
+    for(int i = 0; i < kevin_aperiodic_num; i++) // 每個非週期任務
     {
-        if(kevin_arr_aperiodic[i].arrival == OSTime)
+        if(kevin_arr_aperiodic[i].arrival == OSTime) // arrival
         {   
             // find max of last_d and t
             int t = kevin_arr_aperiodic[i].arrival; // assume t is max
@@ -2278,11 +2278,12 @@ void Kevin_OS_SchedNew(void) {
                 }
             }
             // calculate aperiodic deadline
-            kevin_arr_aperiodic[i].deadline = t + kevin_arr_aperiodic[i].execution / kevin_aperiodic_us;
+            kevin_arr_aperiodic[i].deadline = t + kevin_arr_aperiodic[i].execution / kevin_aperiodic_us; // cus deadline公式
             
         }
-        if(kevin_arr_aperiodic[i].arrival <= OSTime && kevin_arr_task_periodic[kevin_task_num].deadline == 0 && kevin_arr_aperiodic[i].deadline)
+        if(kevin_arr_aperiodic[i].arrival <= OSTime && kevin_arr_task_periodic[kevin_task_num].deadline == 0 && kevin_arr_aperiodic[i].deadline) // 這個非週期要開始做
         {
+            // setting task cus
             kevin_arr_task_periodic[kevin_task_num].arrival = kevin_arr_aperiodic[i].arrival;
             kevin_arr_task_periodic[kevin_task_num].execution = kevin_arr_aperiodic[i].execution;
             kevin_arr_task_periodic[kevin_task_num].period = kevin_arr_aperiodic[i].period;
@@ -2291,10 +2292,10 @@ void Kevin_OS_SchedNew(void) {
             kevin_arr_task_periodic[kevin_task_num].work = kevin_arr_aperiodic[i].execution;
             kevin_arr_task_periodic[kevin_task_num].deadline = kevin_arr_aperiodic[i].deadline;
             kevin_arr_task_periodic[kevin_task_num].aperiodic_job_num = i;
-            if(kevin_arr_aperiodic[i].arrival == OSTime)
+            if(kevin_arr_aperiodic[i].arrival == OSTime) // do nothing 沒有顯示過
                 printf("%d \t Aperiodic job (%d) arrives and sets CUS server's deadline as %d.\n", OSTime, i, kevin_arr_aperiodic[i].deadline);
         }
-        else if(kevin_arr_aperiodic[i].arrival == OSTime)
+        else if(kevin_arr_aperiodic[i].arrival == OSTime) // 要做帶還不能做
         {
             printf("%d \t Aperiodic job (%d) arrives. Do nothing. \n",OSTime ,i);
             printf("%d \t Aperiodic job (%d) sets CUS server's deadline as %d.\n", OSTime, i, kevin_arr_aperiodic[i].deadline);
@@ -2313,7 +2314,7 @@ void Kevin_OS_SchedNew(void) {
             }
             else if(kevin_arr_task_periodic[i].deadline < kevin_arr_task_periodic[OSPrioHighRdy].deadline) // 如果有人比他期限短
             {
-                OSPrioHighRdy = i;
+                OSPrioHighRdy = i; // deadline 最低的
             }
         }
     }
@@ -2353,7 +2354,7 @@ void Kevin_ContextSwitches(void) {
     for(int i = 1; i <= kevin_task_num; i++) // 每個 task
     {
         // if(kevin_arr_task_periodic[i].work < kevin_arr_task_periodic[i].execution || (kevin_arr_task_periodic[i].work == kevin_arr_task_periodic[i].execution && OSPrioHighRdy == i)) // 當這task 有工作 開始做
-        if(i == OSTCBCur->OSTCBPrio || i == OSTCBHighRdy->OSTCBPrio) // 當這task 有工作 開始做
+        if(i == OSTCBCur->OSTCBPrio || i == OSTCBHighRdy->OSTCBPrio) // 當這task 被切換了
         {
             kevin_arr_task_periodic[i].context++; // counter
             // printf("task:%d work:%d\n", i, kevin_arr_task_periodic[i].work);

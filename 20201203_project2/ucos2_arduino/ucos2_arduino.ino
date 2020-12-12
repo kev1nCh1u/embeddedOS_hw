@@ -112,7 +112,7 @@ void task1(void* pdata) {
     Serial.println("Hello from task1");
     // digitalWrite(T1_LEDPin, state);
     // state = !state;
-    OSTimeDly(100000);
+    OSTimeDly(1000);
     // while (1); // kevin 讓他一直卡在裡面 靠OSintexit來切
   }
 }
@@ -124,7 +124,7 @@ void task2(void* pdata) {
     Serial.println("Hello from task2");
     // digitalWrite(T2_LEDPin, state);
     // state = !state;
-    OSTimeDly(500000);
+    OSTimeDly(5000);
     // while (1); // kevin 讓他一直卡在裡面 靠OSintexit來切
   }
 }
@@ -148,7 +148,7 @@ void task4(void* pdata) {
     Serial.println("Hello from task4");
     // digitalWrite(T4_LEDPin, state);
     // state = !state;
-    OSTimeDly(70000);
+    OSTimeDly(7000);
     // while (1); // kevin 讓他一直卡在裡面 靠OSintexit來切
   }
 }
@@ -157,5 +157,4 @@ void task4(void* pdata) {
  *                    Fin
 ***************************************************/
 void loop() {
-  delay(1000000);
 }

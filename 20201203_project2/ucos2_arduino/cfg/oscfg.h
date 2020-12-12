@@ -140,7 +140,7 @@
 #define OS_TMR_CFG_MAX           16u   /*     Maximum number of timers                                 */
 #define OS_TMR_CFG_NAME_EN        1u   /*     Determine timer names                                    */
 #define OS_TMR_CFG_WHEEL_SIZE     8u   /*     Size of timer wheel (#Spokes)                            */
-#define OS_TMR_CFG_TICKS_PER_SEC 10u   /*     Rate at which timer management task runs (Hz)            */
+#define OS_TMR_CFG_TICKS_PER_SEC  1u   /*     Rate at which timer management task runs (Hz)            */
 
 
 #define OS_TASK_TMR_PRIO		15u

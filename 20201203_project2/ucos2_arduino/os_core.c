@@ -931,7 +931,6 @@ void  OSStatInit (void)
 
 void  OSTimeTick (void)
 {   
-    // printf("test\n"); // kevin
     OS_TCB    *ptcb;
 #if OS_TICK_STEP_EN > 0u
     BOOLEAN    step;
@@ -1738,7 +1737,7 @@ static  void  OS_SchedNew (void)
     OSPrioHighRdy = (INT8U)((y << 3u) + OSUnMapTbl[OSRdyTbl[y]]); // kevin
 
     // printf("================================\n");
-    // Kevin_OS_SchedNew(); // kevin find OSPrioHighRdy
+    Kevin_OS_SchedNew(); // kevin find OSPrioHighRdy
 
 #else                                            /* We support up to 256 tasks                         */
     INT8U     y;
