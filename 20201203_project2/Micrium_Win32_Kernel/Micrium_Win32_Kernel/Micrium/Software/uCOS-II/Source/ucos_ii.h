@@ -812,6 +812,7 @@ struct KevinPeriodic kevin_arr_aperiodic[2];
 static const struct KevinPeriodic EmptyStruct;
 
 INT8U kevin_task_num;
+INT8U kevin_arr_short[4]; // 優先順序 rms
 INT8U kevin_aperiodic_num;
 float kevin_aperiodic_us;
 
