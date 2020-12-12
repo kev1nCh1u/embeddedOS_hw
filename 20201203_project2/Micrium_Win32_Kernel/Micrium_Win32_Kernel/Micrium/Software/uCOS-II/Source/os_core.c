@@ -2248,10 +2248,7 @@ void Kevin_OS_SchedNew(void) {
                 kevin_arr_task_periodic[i].work += kevin_arr_task_periodic[i].execution; // 發工作
                 kevin_arr_task_periodic[i].deadline = OSTime + kevin_arr_task_periodic[i].period; // 期限
             }
-            // debug print
-            // printf("%d \t task:%d arrival:%d work:%d\n",OSTime, i, (OSTime - kevin_arr_task_periodic[i].arrival) % kevin_arr_task_periodic[i].period,kevin_arr_task_periodic[i].work);
-
-        }
+        }   
     }
 
     // aperiodic deadline
@@ -2282,14 +2279,14 @@ void Kevin_OS_SchedNew(void) {
             kevin_arr_task_periodic[kevin_task_num].work = kevin_arr_aperiodic[i].execution;
             kevin_arr_task_periodic[kevin_task_num].deadline = kevin_arr_aperiodic[i].deadline;
             kevin_arr_task_periodic[kevin_task_num].aperiodic_job_num = i;
-            printf("%d \t Aperiodic job (%d) sets CUS server's deadline as %d.\n", OSTime, i, kevin_arr_aperiodic[i].deadline);
+            if(kevin_arr_aperiodic[i].arrival == OSTime)
+                printf("%d \t Aperiodic job (%d) arrives and sets CUS server's deadline as %d.\n", OSTime, i, kevin_arr_aperiodic[i].deadline);
         }
         else if(kevin_arr_aperiodic[i].arrival == OSTime)
         {
             printf("%d \t Aperiodic job (%d) arrives. Do nothing. \n",OSTime ,i);
             printf("%d \t Aperiodic job (%d) sets CUS server's deadline as %d.\n", OSTime, i, kevin_arr_aperiodic[i].deadline);
         }
-        
     }
     
     // find OSPrioHighRdy
@@ -2309,6 +2306,13 @@ void Kevin_OS_SchedNew(void) {
         }
     }
 
+    // debug print
+    // printf("%d h:%d \t", OSTime, OSPrioHighRdy);
+    // for(int i = 1; i <= kevin_task_num; i++)
+    // {
+    //     printf("t:%d w:%d r:%d d:%d \t", i, kevin_arr_task_periodic[i].work, kevin_arr_task_periodic[i].response, kevin_arr_task_periodic[i].deadline);
+    // }
+    // printf("\n");
 
     // check if same task gonna continue
     for(int i = 1; i <= kevin_task_num; i++)
@@ -2319,8 +2323,6 @@ void Kevin_OS_SchedNew(void) {
                     // kevin_arr_task_periodic[OSPrioHighRdy].job++; // 或是不列印純job++
         }
     }
-    // debug print
-    // printf("OS_SchedNew OSTime:%d OSPrioHighRdy:%d work:%d \n", OSTime, OSPrioHighRdy, kevin_arr_task_periodic[OSPrioHighRdy].work); // kevin
 }
 
 void Kevin_ContextSwitches(void) {
@@ -2402,7 +2404,7 @@ void Kevin_end(void){
             while (1);
         }
     }
-    if(kevin_aperiodic_num && kevin_arr_task_periodic[kevin_task_num].deadline == OSTime)
+    if(kevin_aperiodic_num && kevin_arr_task_periodic[kevin_task_num].deadline-1 == OSTime)
     {
         kevin_arr_task_periodic[kevin_task_num].arrival = 0;
         kevin_arr_task_periodic[kevin_task_num].period = 0;
