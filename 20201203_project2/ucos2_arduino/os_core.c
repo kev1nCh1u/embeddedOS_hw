@@ -26,6 +26,8 @@
 #ifndef  OS_MASTER_FILE
 #define  OS_GLOBALS
 #include "ucos_ii.h"
+#include "stdio.h"
+#include <Arduino.h>
 #endif
 
 /*
@@ -78,6 +80,15 @@ static  void  OS_InitTaskStat(void);
 static  void  OS_InitTCBList(void);
 
 static  void  OS_SchedNew(void);
+
+/////////////////////////////// kevin function ////////////////////////////////
+void Kevin_StartContextSwitches(void);
+void Kevin_ContextSwitches(void);
+void Kevin_OS_SchedNew(void);
+void Kevin_OSInit(void);
+void Kevin_print(void);
+void Kevin_end(void);
+//////////////////////////////////////////////////////////////////////////////
 
 /*$PAGE*/
 /*
@@ -574,6 +585,9 @@ INT16U  OSEventPendMulti (OS_EVENT  **pevents_pend,
 
 void  OSInit (void)
 {
+    // kevin init
+    Kevin_OSInit();
+
 #if OS_TASK_CREATE_EXT_EN > 0u
 #if defined(OS_TLS_TBL_SIZE) && (OS_TLS_TBL_SIZE > 0u)
     INT8U  err;
@@ -708,12 +722,13 @@ void  OSIntExit (void)
                     OS_TLS_TaskSw();
 #endif
 #endif
-
+                    Kevin_ContextSwitches(); // Kevin ContextSwitches
                     OSIntCtxSw();                          /* Perform interrupt level ctx switch       */
                 }
             }
         }
         OS_EXIT_CRITICAL();
+        Kevin_end();
     }
 }
 /*$PAGE*/
@@ -850,6 +865,7 @@ void  OSSchedUnlock (void)
 void  OSStart (void)
 {   
     if (OSRunning == OS_FALSE) {
+        Kevin_StartContextSwitches();
         OS_SchedNew();                               /* Find highest priority's task priority number   */
         OSPrioCur     = OSPrioHighRdy;
         OSTCBHighRdy  = OSTCBPrioTbl[OSPrioHighRdy]; /* Point to highest priority task ready to run    */
@@ -914,7 +930,8 @@ void  OSStatInit (void)
 */
 
 void  OSTimeTick (void)
-{
+{   
+    // printf("test\n"); // kevin
     OS_TCB    *ptcb;
 #if OS_TICK_STEP_EN > 0u
     BOOLEAN    step;
@@ -1685,12 +1702,13 @@ OSTCBPrioTbl[OSPrioHighRdy];
                 OS_TLS_TaskSw();
 #endif
 #endif
-
+                Kevin_ContextSwitches(); // Kevin ContextSwitches
                 OS_TASK_SW();                          /* Perform a context switch                     */
             }
         }
     }
     OS_EXIT_CRITICAL();
+    Kevin_end();
 }
 
 
@@ -1717,7 +1735,11 @@ static  void  OS_SchedNew (void)
 
 
     y             = OSUnMapTbl[OSRdyGrp];
-    OSPrioHighRdy = (INT8U)((y << 3u) + OSUnMapTbl[OSRdyTbl[y]]);
+    OSPrioHighRdy = (INT8U)((y << 3u) + OSUnMapTbl[OSRdyTbl[y]]); // kevin
+
+    // printf("================================\n");
+    // Kevin_OS_SchedNew(); // kevin find OSPrioHighRdy
+
 #else                                            /* We support up to 256 tasks                         */
     INT8U     y;
     OS_PRIO  *ptbl;
@@ -2075,3 +2097,276 @@ INT8U  OS_TCBInit (INT8U    prio,
     OS_EXIT_CRITICAL();
     return (OS_ERR_TASK_NO_MORE_TCB);
 }
+
+///////////////////////////////////// kevin function ////////////////////////////////////////////////
+void Kevin_OSInit(void){
+    // define
+    kevin_task1_periodic = &kevin_arr_task_periodic[1];
+    kevin_task2_periodic = &kevin_arr_task_periodic[2];
+    kevin_task3_periodic = &kevin_arr_task_periodic[3];
+    kevin_task4_periodic = &kevin_arr_task_periodic[4];
+
+    kevin_task1_periodic->arrival =     0;
+    kevin_task1_periodic->execution =   1;
+    kevin_task1_periodic->period =      4;
+
+    kevin_task2_periodic->arrival =     0;
+    kevin_task2_periodic->execution =   3;
+    kevin_task2_periodic->period =      6;
+
+    kevin_task3_periodic->arrival =     1;
+    kevin_task3_periodic->execution =   1;
+    kevin_task3_periodic->period =      3;
+
+    kevin_task4_periodic->arrival =     0;
+    kevin_task4_periodic->execution =   0;
+    kevin_task4_periodic->period =      0;
+
+    kevin_arr_aperiodic[0].arrival =    4;
+    kevin_arr_aperiodic[0].execution =  3;
+    kevin_arr_aperiodic[0].period =     16;
+
+    kevin_arr_aperiodic[1].arrival =    17;
+    kevin_arr_aperiodic[1].execution =  3;
+    kevin_arr_aperiodic[1].period =     30;
+
+    kevin_task_num =        3;
+    kevin_aperiodic_num =   0;
+    kevin_aperiodic_us =    0.3;
+    
+    // kevin print task seting show
+    for(int i = 1; i <= kevin_task_num; i++)
+        printf("t%d(%d,%d,%d),", i, kevin_arr_task_periodic[i].arrival,kevin_arr_task_periodic[i].execution,kevin_arr_task_periodic[i].period);
+    printf("\n");
+
+    // kevin rms sort
+    // for(int i = 1; i <= kevin_task_num; i++)
+    // {
+    //     int k = 1;
+    //     for(int j = 1; j <= kevin_task_num; j++)
+    //         if(kevin_arr_task_periodic[i].period > kevin_arr_task_periodic[j].period)
+    //             k++; 
+    //     kevin_arr_short[k] = i;
+    //     // printf("=>task%d short:%d short:%d\n", i,kevin_arr_task_periodic[i].sort, kevin_arr_short[k]);
+    // }
+
+    // kevin print aperiodic seting show
+    for(int i = 0; i < kevin_aperiodic_num; i++)
+        printf("j%d(%d,%d,%d),", i, kevin_arr_aperiodic[i].arrival,kevin_arr_aperiodic[i].execution,kevin_arr_aperiodic[i].period);
+    if(kevin_aperiodic_num)
+        printf("Us(%.2f)\n", kevin_aperiodic_us);
+
+    printf("\n");
+}
+
+void Kevin_StartContextSwitches(void) {
+
+    // kevin rm title
+    printf("\nTick \t Event \t \t CurrentTask ID \t NextTask ID \t ResponseTime \t # of ContextSwitch \n"); // kevin title
+}
+
+void Kevin_OS_SchedNew(void) {
+    printf("QQ\n");
+    
+    // counter
+    if (OSPrioHighRdy <= kevin_task_num && OSTime != 0) // 排除 idle 跟開始
+        kevin_arr_task_periodic[OSPrioHighRdy].work--; // 計算execution被做掉了幾次
+
+    // periodic plus work
+    for(int i = 1; i <= kevin_task_num; i++) // 每個 task
+    {
+        kevin_arr_task_periodic[i].response++; // counter 紀錄從週期開始響應時間
+
+        // periodic plus work
+        if(kevin_arr_task_periodic[i].execution)
+        {
+            int kevin_OSTime_arrival = (OSTime - kevin_arr_task_periodic[i].arrival); // arrival
+            if(kevin_OSTime_arrival >= 0 && kevin_OSTime_arrival % kevin_arr_task_periodic[i].period  == 0) // 排除0取餘數 找到週期
+            {
+                if(!(kevin_arr_task_periodic[i].work == 0 && OSPrioHighRdy == i)) // 當前的工作沒被發工作
+                {
+                    kevin_arr_task_periodic[i].response = 0;
+                    kevin_arr_task_periodic[i].context = 0;
+                }
+                if(kevin_arr_task_periodic[i].work == 0)
+                    kevin_arr_task_periodic[i].deadline = OSTime + kevin_arr_task_periodic[i].period; // 期限
+                kevin_arr_task_periodic[i].work += kevin_arr_task_periodic[i].execution; // 發工作
+            }
+        }   
+    }
+
+    // aperiodic deadline
+    for(int i = 0; i < kevin_aperiodic_num; i++)
+    {
+        if(kevin_arr_aperiodic[i].arrival == OSTime)
+        {   
+            // find max of last_d and t
+            int t = kevin_arr_aperiodic[i].arrival; // assume t is max
+            if(i) // i > 0 have last_d
+            {
+                if(kevin_arr_aperiodic[i-1].deadline >= t) // last_d max than t
+                {
+                    t = kevin_arr_aperiodic[i-1].deadline;
+                }
+            }
+            // calculate aperiodic deadline
+            kevin_arr_aperiodic[i].deadline = t + kevin_arr_aperiodic[i].execution / kevin_aperiodic_us;
+            
+        }
+        if(kevin_arr_aperiodic[i].arrival <= OSTime && kevin_arr_task_periodic[kevin_task_num].deadline == 0 && kevin_arr_aperiodic[i].deadline)
+        {
+            kevin_arr_task_periodic[kevin_task_num].arrival = kevin_arr_aperiodic[i].arrival;
+            kevin_arr_task_periodic[kevin_task_num].execution = kevin_arr_aperiodic[i].execution;
+            kevin_arr_task_periodic[kevin_task_num].period = kevin_arr_aperiodic[i].period;
+            kevin_arr_task_periodic[kevin_task_num].response = 0;
+            kevin_arr_task_periodic[kevin_task_num].context = 0;
+            kevin_arr_task_periodic[kevin_task_num].work = kevin_arr_aperiodic[i].execution;
+            kevin_arr_task_periodic[kevin_task_num].deadline = kevin_arr_aperiodic[i].deadline;
+            kevin_arr_task_periodic[kevin_task_num].aperiodic_job_num = i;
+            if(kevin_arr_aperiodic[i].arrival == OSTime)
+                printf("%d \t Aperiodic job (%d) arrives and sets CUS server's deadline as %d.\n", OSTime, i, kevin_arr_aperiodic[i].deadline);
+        }
+        else if(kevin_arr_aperiodic[i].arrival == OSTime)
+        {
+            printf("%d \t Aperiodic job (%d) arrives. Do nothing. \n", OSTime, i);
+            printf("%d \t Aperiodic job (%d) sets CUS server's deadline as %d.\n", OSTime, i, kevin_arr_aperiodic[i].deadline);
+        }
+    }
+    
+    // edf find OSPrioHighRdy
+    OSPrioHighRdy = 63; // find OSPrioHighRdy 先假設沒人要做事
+    for(int i = 1; i <= kevin_task_num; i++) // 每個 task
+    {
+        if (kevin_arr_task_periodic[i].work != 0) // 找有事做的
+        {
+            if(OSPrioHighRdy == 63)
+            {
+                OSPrioHighRdy = i;
+            }
+            else if(kevin_arr_task_periodic[i].deadline < kevin_arr_task_periodic[OSPrioHighRdy].deadline) // 如果有人比他期限短
+            {
+                OSPrioHighRdy = i;
+            }
+        }
+    }
+
+    // rms find OSPrioHighRdy
+    // OSPrioHighRdy = 63; // find OSPrioHighRdy 先假設沒人要做事
+    // for(int i = 1; i <= kevin_task_num; i++) // 每個 task
+    // {
+    //     if (kevin_arr_task_periodic[kevin_arr_short[i]].work != 0) // 從 週期短 高優先 開始找有事做的
+    //     {
+    //         OSPrioHighRdy = kevin_arr_short[i];
+    //         break;
+    //     }
+    // }
+
+    // debug print
+    printf("%d h:%d \t", OSTime, OSPrioHighRdy);
+    for(int i = 1; i <= kevin_task_num; i++)
+    {
+        printf("t:%d r:%d w:%d d:%d \t", i, kevin_arr_task_periodic[i].response, kevin_arr_task_periodic[i].work, kevin_arr_task_periodic[i].deadline);
+    }
+    printf("\n");
+
+    // check if same task gonna continue
+    for(int i = 1; i <= kevin_task_num; i++)
+    {
+        if(OSPrioHighRdy == i && kevin_arr_task_periodic[i].work == 0){ // 做完了但接著做 不會進context 所以在這job++ 印出來
+                    printf("%d \t Completion \t task(%d)(%d) \t \t task(%d)(%d) \t \t %d \t \t %d \n"
+                    , OSTime, OSPrioHighRdy,kevin_arr_task_periodic[OSPrioHighRdy].job++, OSPrioHighRdy, kevin_arr_task_periodic[OSPrioHighRdy].job, kevin_arr_task_periodic[OSPrioHighRdy].response, kevin_arr_task_periodic[OSPrioHighRdy].context); // kevin
+                    // kevin_arr_task_periodic[OSPrioHighRdy].job++; // 或是不列印純job++
+        }
+    }
+}
+
+void Kevin_ContextSwitches(void) {
+    // context counting
+    for(int i = 1; i <= kevin_task_num; i++) // 每個 task
+    {
+        // if(kevin_arr_task_periodic[i].work < kevin_arr_task_periodic[i].execution || (kevin_arr_task_periodic[i].work == kevin_arr_task_periodic[i].execution && OSPrioHighRdy == i)) // 當這task 有工作 開始做
+        if(i == OSTCBCur->OSTCBPrio || i == OSTCBHighRdy->OSTCBPrio) // 當這task 有工作 開始做
+        {
+            kevin_arr_task_periodic[i].context++; // counter
+            // printf("task:%d work:%d\n", i, kevin_arr_task_periodic[i].work);
+        }
+    }
+
+    // print
+    Kevin_print();
+}
+
+void Kevin_print(void){
+    unsigned int eventFlag = 0;
+    
+    // aperiodic finish
+    if(kevin_arr_task_periodic[kevin_task_num].execution && kevin_arr_task_periodic[kevin_task_num].work == 0 && kevin_aperiodic_num)
+    {
+        printf("%d \t ",OSTime);
+        printf("Aperiodic job (%d) is finished. \n", kevin_arr_task_periodic[kevin_task_num].aperiodic_job_num);
+        kevin_arr_task_periodic[kevin_task_num].execution = 0;
+        kevin_arr_aperiodic[kevin_arr_task_periodic[kevin_task_num].aperiodic_job_num] = EmptyStruct;
+    }
+
+    // tick
+    printf("%d \t ",OSTime);
+
+    // Event
+    if((kevin_arr_task_periodic[OSTCBCur->OSTCBPrio].work == 0 || kevin_arr_task_periodic[OSTCBCur->OSTCBPrio].work == kevin_arr_task_periodic[OSTCBCur->OSTCBPrio].execution) && OSTCBCur->OSTCBPrio != 63)
+    {
+        printf("Completion \t ");
+        eventFlag = 1;
+    }
+    else
+        printf("Preemption \t ");
+    
+    // CurrentTask ID
+    printf("task(%d)",OSTCBCur->OSTCBPrio);
+    if(OSTCBCur->OSTCBPrio != 63)
+        printf("(%d) ", kevin_arr_task_periodic[OSTCBCur->OSTCBPrio].job);
+    printf("\t \t ");
+
+    // NextTask ID
+    printf("task(%d)",OSTCBHighRdy->OSTCBPrio);
+    if(OSTCBHighRdy->OSTCBPrio != 63)
+        printf("(%d) ", kevin_arr_task_periodic[OSTCBHighRdy->OSTCBPrio].job);
+    
+    // ResponseTime ContextSwitch
+    if(eventFlag)
+    {
+        printf("\t \t %d \t \t %d ", kevin_arr_task_periodic[OSTCBCur->OSTCBPrio].response, kevin_arr_task_periodic[OSTCBCur->OSTCBPrio].context);
+        kevin_arr_task_periodic[OSTCBCur->OSTCBPrio].job++;
+        kevin_arr_task_periodic[OSTCBCur->OSTCBPrio].response = 0;
+        kevin_arr_task_periodic[OSTCBCur->OSTCBPrio].context = 0;
+    }
+    printf("\n");
+
+}
+
+void Kevin_end(void){
+    // miss deadline
+    for(int i = 1; i <= kevin_task_num; i++) // 每個 task
+    {
+        if(kevin_arr_task_periodic[i].work > kevin_arr_task_periodic[i].execution && i != kevin_task_num) // 發現miss
+        {
+        
+            printf("%d \t MissDeadline \t task(%d)(%d) \t \t -------------------\n", OSTime, i, kevin_arr_task_periodic[i].job);
+            while (1);
+        }
+        if(kevin_arr_task_periodic[kevin_task_num].work && kevin_arr_task_periodic[kevin_task_num].deadline <= OSTime) // 發現miss
+        {
+            printf("%d Aperiodic job (%d) misses deadline.", OSTime, kevin_arr_task_periodic[kevin_task_num].job);
+            while (1);
+        }
+    }
+
+    // clear
+    if(kevin_aperiodic_num && kevin_arr_task_periodic[kevin_task_num].deadline-1 == OSTime)
+    {
+        kevin_arr_task_periodic[kevin_task_num].arrival = 0;
+        kevin_arr_task_periodic[kevin_task_num].period = 0;
+        kevin_arr_task_periodic[kevin_task_num].deadline = 0;
+    }
+    printf("\n");
+}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

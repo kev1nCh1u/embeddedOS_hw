@@ -15,7 +15,7 @@
 * LICENSING TERMS:
 * ---------------
 *   uC/OS-II is provided in source form for FREE evaluation, for educational use or for peaceful research.
-* If you plan on using  uC/OS-II  in a commercial product you need to contact Micriµm to properly license
+* If you plan on using  uC/OS-II  in a commercial product you need to contact Micriï¿½m to properly license
 * its use in your product. We provide ALL the source code for your convenience and to help you experience
 * uC/OS-II.   The fact that the  source is provided does  NOT  mean that you can use it without  paying a
 * licensing fee.
@@ -48,7 +48,7 @@
 #define OS_SCHED_LOCK_EN          1u   /* Include code for OSSchedLock() and OSSchedUnlock()           */
 
 #define OS_TICK_STEP_EN           1u   /* Enable tick stepping feature for uC/OS-View                  */
-#define OS_TICKS_PER_SEC        100u   /* Set the number of ticks in one second                        */
+#define OS_TICKS_PER_SEC          1u   /* Set the number of ticks in one second                        */
 
 
                                        /* --------------------- TASK STACK SIZE ---------------------- */
@@ -138,7 +138,7 @@
 #define OS_TMR_CFG_MAX           16u   /*     Maximum number of timers                                 */
 #define OS_TMR_CFG_NAME_EN        1u   /*     Determine timer names                                    */
 #define OS_TMR_CFG_WHEEL_SIZE     8u   /*     Size of timer wheel (#Spokes)                            */
-#define OS_TMR_CFG_TICKS_PER_SEC 10u   /*     Rate at which timer management task runs (Hz)            */
+#define OS_TMR_CFG_TICKS_PER_SEC  1u   /*     Rate at which timer management task runs (Hz)            */
 
 
 #define OS_TASK_TMR_PRIO		15u
