@@ -2176,32 +2176,32 @@ void Kevin_OSInit(void){
     kevin_task4_periodic = &kevin_arr_task_periodic[4];
 
     kevin_task1_periodic->arrival =     0;
-    kevin_task1_periodic->execution =   1;
-    kevin_task1_periodic->period =      4;
+    kevin_task1_periodic->execution =   2;
+    kevin_task1_periodic->period =      8;
 
     kevin_task2_periodic->arrival =     0;
     kevin_task2_periodic->execution =   3;
-    kevin_task2_periodic->period =      6;
+    kevin_task2_periodic->period =      10;
 
-    kevin_task3_periodic->arrival =     1;
-    kevin_task3_periodic->execution =   1;
-    kevin_task3_periodic->period =      3;
+    kevin_task3_periodic->arrival =     0;
+    kevin_task3_periodic->execution =   5;
+    kevin_task3_periodic->period =      20;
 
     kevin_task4_periodic->arrival =     0;
     kevin_task4_periodic->execution =   0;
     kevin_task4_periodic->period =      0;
 
-    kevin_arr_aperiodic[0].arrival =    4;
+    kevin_arr_aperiodic[0].arrival =    12;
     kevin_arr_aperiodic[0].execution =  3;
-    kevin_arr_aperiodic[0].period =     16;
+    kevin_arr_aperiodic[0].period =     28;
 
-    kevin_arr_aperiodic[1].arrival =    17;
-    kevin_arr_aperiodic[1].execution =  3;
-    kevin_arr_aperiodic[1].period =     30;
+    kevin_arr_aperiodic[1].arrival =    14;
+    kevin_arr_aperiodic[1].execution =  2;
+    kevin_arr_aperiodic[1].period =     39;
 
-    kevin_task_num =        3;
-    kevin_aperiodic_num =   0;
-    kevin_aperiodic_us =    0.3;
+    kevin_task_num =        4;
+    kevin_aperiodic_num =   2;
+    kevin_aperiodic_us =    0.2;
     
     // kevin print task seting show
     for(int i = 1; i <= kevin_task_num; i++)
@@ -2292,13 +2292,15 @@ void Kevin_OS_SchedNew(void) {
             kevin_arr_task_periodic[kevin_task_num].work = kevin_arr_aperiodic[i].execution;
             kevin_arr_task_periodic[kevin_task_num].deadline = kevin_arr_aperiodic[i].deadline;
             kevin_arr_task_periodic[kevin_task_num].aperiodic_job_num = i;
-            if(kevin_arr_aperiodic[i].arrival == OSTime) // do nothing 沒有顯示過
+            if(kevin_arr_aperiodic[i].arrival == OSTime) // 到了就可以做
                 printf("%d \t Aperiodic job (%d) arrives and sets CUS server's deadline as %d.\n", OSTime, i, kevin_arr_aperiodic[i].deadline);
+            else // 沒能馬上做到
+                printf("%d \t Aperiodic job (%d) sets CUS server's deadline as %d.\n", OSTime, i, kevin_arr_aperiodic[i].deadline);
         }
         else if(kevin_arr_aperiodic[i].arrival == OSTime) // 要做帶還不能做
         {
             printf("%d \t Aperiodic job (%d) arrives. Do nothing. \n",OSTime ,i);
-            printf("%d \t Aperiodic job (%d) sets CUS server's deadline as %d.\n", OSTime, i, kevin_arr_aperiodic[i].deadline);
+            // printf("%d \t Aperiodic job (%d) sets CUS server's deadline as %d.\n", OSTime, i, kevin_arr_aperiodic[i].deadline);
         }
     }
     
