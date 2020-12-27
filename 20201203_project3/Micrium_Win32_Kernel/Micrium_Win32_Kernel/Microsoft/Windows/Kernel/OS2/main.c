@@ -57,6 +57,8 @@
 #define TASK3_ID         3
 #define TASK4_ID         4
 
+#define R1_PRIO 1
+#define R2_PRIO 2
 /*
 *********************************************************************************************************
 *                                       LOCAL GLOBAL VARIABLES
@@ -70,6 +72,8 @@ static  OS_STK  Task2_STK[TASK_STACKSIZE];
 static  OS_STK  Task3_STK[TASK_STACKSIZE];  // kevin
 static  OS_STK  Task4_STK[TASK_STACKSIZE];  // kevin
 
+OS_EVENT* R1;
+OS_EVENT* R2;
 /*
 *********************************************************************************************************
 *                                         FUNCTION PROTOTYPES
@@ -171,6 +175,10 @@ int  main (void)
             0,
             (OS_TASK_OPT_STK_CHK | OS_TASK_OPT_STK_CLR));
 
+    INT8U err;
+    R1 = OSMutexCreate(R1_PRIO, &err);
+    R2 = OSMutexCreate(R2_PRIO, &err);
+
     OSTimeSet(0);    // kevin reset time
     OSStart();                                                  /* Start multitasking (i.e. give control to uC/OS-II)   */
 
@@ -217,12 +225,37 @@ static  void  StartupTask (void *p_arg)
 		APP_TRACE_DBG(("Time: %d\n\r", OSTimeGet()));
     }
 }
- 
+
+void mywait(int tick)
+{
+#if OS_CRITICAL_METHOD == 3
+    OS_CPU_SR cpu_sr = 0;
+#endif
+    int now, exit;
+    OS_ENTER_CRITICAL();
+    now = OSTimeGet();
+    exit = now + tick;
+    OS_EXIT_CRITICAL();
+    while (1)
+    {
+        if (exit <= OSTimeGet())
+            break;
+    }
+    
+}
+
 void task1(void* p_arg) {
     (void)p_arg;
+    INT8U err;
     while (1) {
         // printf("Hello from task1\n");
-        while (1); // kevin 讓他一直卡在裡面 靠OSintexit來切
+        // while (1); // kevin 讓他一直卡在裡面 靠OSintexit來切
+
+        printf("%d \t Task 1\n", OSTimeGet());
+        mywait(3);
+        printf("%d \t Task 1 get R2\n", OSTimeGet());
+        OSMutexPend(R2, 0, &err);
+        mywait(7);
     }
 }
 
