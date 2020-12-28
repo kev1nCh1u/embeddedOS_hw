@@ -2238,7 +2238,10 @@ void Kevin_OSInit(void){
 void Kevin_StartContextSwitches(void) {
 
     // kevin rm title
-    printf("\nTick \t Event \t \t CurrentTask ID \t NextTask ID \t ResponseTime \t # of ContextSwitch \n"); // kevin title
+    // printf("\nTick \t Event \t \t CurrentTask ID \t NextTask ID \t ResponseTime \t # of ContextSwitch \n"); // kevin title
+
+    // kevin project3 title
+    printf("\nTick \t Event \t \n"); // kevin title
 }
 
 /**********************************************************************************************************
