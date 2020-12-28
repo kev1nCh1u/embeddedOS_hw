@@ -1782,9 +1782,9 @@ static  void  OS_SchedNew (void)
     INT8U   y;
 
     y             = OSUnMapTbl[OSRdyGrp];
-    // OSPrioHighRdy = (INT8U)((y << 3u) + OSUnMapTbl[OSRdyTbl[y]]); // kevin
+    OSPrioHighRdy = (INT8U)((y << 3u) + OSUnMapTbl[OSRdyTbl[y]]); // kevin
 
-    Kevin_OS_SchedNew(); // kevin find OSPrioHighRdy
+    // Kevin_OS_SchedNew(); // kevin find OSPrioHighRdy
 
 #else                                            /* We support up to 256 tasks                         */
     INT8U     y;
@@ -2179,17 +2179,17 @@ void Kevin_OSInit(void){
     kevin_task3_periodic = &kevin_arr_task_periodic[3];
     kevin_task4_periodic = &kevin_arr_task_periodic[4];
 
-    kevin_task1_periodic->arrival =     0;
-    kevin_task1_periodic->execution =   1;
-    kevin_task1_periodic->period =      3;
+    kevin_task1_periodic->arrival =     3;
+    kevin_task1_periodic->execution =   4;
+    kevin_task1_periodic->period =      25;
 
     kevin_task2_periodic->arrival =     0;
-    kevin_task2_periodic->execution =   3;
-    kevin_task2_periodic->period =      6;
+    kevin_task2_periodic->execution =   8;
+    kevin_task2_periodic->period =      27;
 
-    kevin_task3_periodic->arrival =     1;
-    kevin_task3_periodic->execution =   1;
-    kevin_task3_periodic->period =      5;
+    kevin_task3_periodic->arrival =     0;
+    kevin_task3_periodic->execution =   7;
+    kevin_task3_periodic->period =      90;
 
     kevin_task4_periodic->arrival =     0;
     kevin_task4_periodic->execution =   0;
@@ -2386,7 +2386,7 @@ void Kevin_ContextSwitches(void) {
     }
 
     // print
-    Kevin_print();
+    // Kevin_print();
 }
 
 /**********************************************************************************************************
