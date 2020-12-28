@@ -2387,6 +2387,14 @@ void Kevin_ContextSwitches(void) {
 
     // print
     // Kevin_print();
+    
+    // print idle
+    // if(OSTCBHighRdy->OSTCBPrio  == 63)
+    //     printf("%d \t Task 63\n", OSTimeGet());
+
+    // print next task
+    printf("%d \t Task %d\n", OSTimeGet(), OSTCBHighRdy->OSTCBPrio);
+    
 }
 
 /**********************************************************************************************************

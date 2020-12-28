@@ -226,20 +226,34 @@ static  void  StartupTask (void *p_arg)
     }
 }
 
-void mywait(int tick)
+void mywait(int tick, int task)
 {
 #if OS_CRITICAL_METHOD == 3
     OS_CPU_SR cpu_sr = 0;
 #endif
-    int now, exit;
+    int now, exit, last, diff, count = 0;
     OS_ENTER_CRITICAL();
     now = OSTimeGet();
     exit = now + tick;
+    last = now;
     OS_EXIT_CRITICAL();
     while (1)
     {
-        if (exit <= OSTimeGet())
+        OS_ENTER_CRITICAL();
+        diff = OSTimeGet() - last;
+        last = OSTimeGet();
+        if(diff >= 1)
+        {
+            count ++;
+            // printf(" \t # Task %d count:%d diff:%d\n", task, count, diff);
+        }
+         OS_EXIT_CRITICAL();
+
+        // if (exit <= OSTimeGet())
+        if (tick <= count)
+        {
             break;
+        }
     }
     
 }
@@ -255,20 +269,20 @@ void task1(void* p_arg) {
         kevin_task1_periodic->deadline = kevin_task1_periodic->arrival + kevin_task1_periodic->period * (kevin_task1_periodic->job + 1);
         // printf("%d \t # Task 1 deadline:%d\n", OSTimeGet(), kevin_task1_periodic->deadline); // debug
 
-        printf("%d \t Task 1\n", OSTimeGet());
-        mywait(1);
+        // printf("%d \t Task 1\n", OSTimeGet());
+        mywait(1, 1);
 
         printf("%d \t Task 1 get R2\n", OSTimeGet());
         OSMutexPend(R2, 0, &err);
         // OS_ENTER_CRITICAL();
         OSSchedLock();
-        mywait(2);
+        mywait(2, 1);
 
         printf("%d \t Task 1 release R2\n", OSTimeGet());
         OSMutexPost(R2);
         // OS_EXIT_CRITICAL();
         OSSchedUnlock();
-        mywait(1);
+        mywait(1, 1);
 
         kevin_task1_periodic->job ++;
         // printf("%d \t # Task 1 OSTimeDly:%d\n", OSTimeGet(), kevin_task1_periodic->deadline - OSTimeGet()); // debug
@@ -288,32 +302,32 @@ void task2(void* p_arg) {
         kevin_task2_periodic->deadline = kevin_task2_periodic->arrival + kevin_task2_periodic->period * (kevin_task2_periodic->job + 1);
         // printf("%d \t # Task 2 deadline:%d\n", OSTimeGet(), kevin_task2_periodic->deadline); // debug
 
-        printf("%d \t Task 2\n", OSTimeGet());
-        mywait(2);
+        // printf("%d \t Task 2\n", OSTimeGet());
+        mywait(2, 2);
 
         printf("%d \t Task 2 get R1\n", OSTimeGet());
         OSMutexPend(R1, 0, &err);
         // OS_ENTER_CRITICAL();
         OSSchedLock();
-        mywait(3);
+        mywait(3, 2);
 
         printf("%d \t Task 2 get R2\n", OSTimeGet());
         OSMutexPend(R2, 0, &err);
         // OS_ENTER_CRITICAL();
         OSSchedLock();
-        mywait(1);
+        mywait(1, 2);
 
         printf("%d \t Task 2 release R2\n", OSTimeGet());
         OSMutexPost(R2, 0, &err);
         // OS_EXIT_CRITICAL();
         OSSchedUnlock();
-        mywait(1);
+        mywait(1, 2);
 
         printf("%d \t Task 2 release R1\n", OSTimeGet());
         OSMutexPost(R1, 0, &err);
         // OS_EXIT_CRITICAL();
         OSSchedUnlock();
-        mywait(1);
+        mywait(1, 2);
 
         kevin_task2_periodic->job ++;
         // printf("%d \t # Task 2 OSTimeDly:%d\n", OSTimeGet(), kevin_task2_periodic->deadline - OSTimeGet()); // debug
