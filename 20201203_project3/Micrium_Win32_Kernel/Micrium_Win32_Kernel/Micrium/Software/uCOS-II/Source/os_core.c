@@ -2230,7 +2230,9 @@ void Kevin_OSInit(void){
     kevin_aperiodic_num =   0;
     kevin_aperiodic_us =    0.2;
     
-    // kevin print task seting show
+    printf("part%d task_set%d => ", kevin_part, kevin_task_set);
+
+    // kevin print task seting
     for(int i = 1; i <= kevin_task_num; i++)
         printf("t%d(%d,%d,%d),", i, kevin_arr_task_periodic[i].arrival,kevin_arr_task_periodic[i].execution,kevin_arr_task_periodic[i].period);
     printf("\n");

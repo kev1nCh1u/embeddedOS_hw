@@ -270,25 +270,33 @@ void lock_R1() {
     INT8U err;
     printf("%d \t Task %d get R1\n", OSTimeGet(), OSTCBHighRdy->OSTCBPrio);
     OSMutexPend(R1, 0, &err);
+    #if(kevin_part == 1)
     OSSchedLock();
+    #endif
 }
 void unlock_R1() {
     INT8U err;
     printf("%d \t Task %d release R1\n", OSTimeGet(), OSTCBHighRdy->OSTCBPrio);
     OSMutexPost(R1, 0, &err);
+    #if(kevin_part == 1)
     OSSchedUnlock();
+    #endif
 }
 void lock_R2() {
     INT8U err;
     printf("%d \t Task %d get R2\n", OSTimeGet(), OSTCBHighRdy->OSTCBPrio);
     OSMutexPend(R2, 0, &err);
+    #if(kevin_part == 1)
     OSSchedLock();
+    #endif
 }
 void unlock_R2() {
     INT8U err;
     printf("%d \t Task %d release R2\n", OSTimeGet(), OSTCBHighRdy->OSTCBPrio);
     OSMutexPost(R2, 0, &err);
+    #if(kevin_part == 1)
     OSSchedUnlock();
+    #endif
 }
 
 /****************************************************************************************************
