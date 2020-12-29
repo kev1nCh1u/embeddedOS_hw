@@ -816,7 +816,7 @@ INT8U kevin_arr_short[4]; // 優先順序 rms
 INT8U kevin_aperiodic_num;
 float kevin_aperiodic_us;
 
-#define kevin_task_set  0u // task set
+#define kevin_task_set  2u // task set
 #define kevin_part   2u // task set
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////

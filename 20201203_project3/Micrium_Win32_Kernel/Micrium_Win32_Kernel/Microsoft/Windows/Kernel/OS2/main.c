@@ -58,7 +58,7 @@
 #define TASK4_ID         4
 
 #define R1_PRIO 1
-#define R2_PRIO 2
+#define R2_PRIO 1
 /*
 *********************************************************************************************************
 *                                       LOCAL GLOBAL VARIABLES
