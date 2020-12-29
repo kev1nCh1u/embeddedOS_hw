@@ -226,16 +226,20 @@ static  void  StartupTask (void *p_arg)
     }
 }
 
-void mywait(int tick, int taskNum)
+/****************************************************************************************************
+*                      mywait
+* **************************************************************************************************/
+void mywait(int tick)
 {
 #if OS_CRITICAL_METHOD == 3
     OS_CPU_SR cpu_sr = 0;
 #endif
-    int now, exit, last, diff, count = 0;
+    int now, exit, last, diff, taskNum, count = 0;
     OS_ENTER_CRITICAL();
     // now = OSTimeGet(); // Original but it will miss when interrupt
     // exit = now + tick; // Original but it will miss when interrupt
     last = OSTimeGet();
+    taskNum = OSTCBHighRdy->OSTCBPrio; 
     OS_EXIT_CRITICAL();
     while (1)
     {
@@ -258,6 +262,38 @@ void mywait(int tick, int taskNum)
     
 }
 
+/****************************************************************************************************
+*                      lock & unlock
+* **************************************************************************************************/
+
+void lock_R1() {
+    INT8U err;
+    printf("%d \t Task %d get R1\n", OSTimeGet(), OSTCBHighRdy->OSTCBPrio);
+    OSMutexPend(R1, 0, &err);
+    OSSchedLock();
+}
+void unlock_R1() {
+    INT8U err;
+    printf("%d \t Task %d release R1\n", OSTimeGet(), OSTCBHighRdy->OSTCBPrio);
+    OSMutexPost(R1, 0, &err);
+    OSSchedUnlock();
+}
+void lock_R2() {
+    INT8U err;
+    printf("%d \t Task %d get R2\n", OSTimeGet(), OSTCBHighRdy->OSTCBPrio);
+    OSMutexPend(R2, 0, &err);
+    OSSchedLock();
+}
+void unlock_R2() {
+    INT8U err;
+    printf("%d \t Task %d release R2\n", OSTimeGet(), OSTCBHighRdy->OSTCBPrio);
+    OSMutexPost(R2, 0, &err);
+    OSSchedUnlock();
+}
+
+/****************************************************************************************************
+*                      task1
+* **************************************************************************************************/
 void task1(void* p_arg) {
     (void)p_arg;
     INT8U err;
@@ -265,22 +301,51 @@ void task1(void* p_arg) {
     while (1) {
         // printf("Hello from task1\n");
         // while (1); // kevin 讓他一直卡在裡面 靠OSintexit來切
-
+        
+        if(!(OSTimeGet()))
+            printf("%d \t Task %d\n", OSTimeGet(), OSTCBHighRdy->OSTCBPrio);
         kevin_task1_periodic->deadline = kevin_task1_periodic->arrival + kevin_task1_periodic->period * (kevin_task1_periodic->job + 1);
         // printf("%d \t # Task 1 deadline:%d\n", OSTimeGet(), kevin_task1_periodic->deadline); // debug
 
+        /****************************************************************************************************
+         *                      Example task set 0
+         * **************************************************************************************************/
+        #if kevin_task_set == 0u
         // printf("%d \t Task 1\n", OSTimeGet()); // Original change to show when context switch
-        mywait(1, 1);
+        mywait(1);
+        lock_R2();
+        mywait(2);
+        unlock_R2();
+        mywait(1);
+        #endif
 
-        printf("%d \t Task 1 get R2\n", OSTimeGet());
-        OSMutexPend(R2, 0, &err);
-        OSSchedLock();
-        mywait(2, 1);
+        /****************************************************************************************************
+         *                      task set 1
+         * **************************************************************************************************/
+        #if kevin_task_set == 1u
+        // printf("%d \t Task 2\n", OSTimeGet()); // Original change to show when context switch
+        mywait(1);
+        lock_R1();
+        mywait(3);
+        unlock_R1();
+        mywait(1);
+        #endif
 
-        printf("%d \t Task 1 release R2\n", OSTimeGet());
-        OSMutexPost(R2);
-        OSSchedUnlock();
-        mywait(1, 1);
+        /****************************************************************************************************
+         *                      task set 2
+         * **************************************************************************************************/
+        #if kevin_task_set == 2u
+        // printf("%d \t Task 2\n", OSTimeGet()); // Original change to show when context switch
+        mywait(1);
+        lock_R1();
+        mywait(2);
+        lock_R2();
+        mywait(2);
+        unlock_R2();
+        unlock_R1();
+        mywait(1);
+        #endif
+        /*****************************************************************************************************/
 
         kevin_task1_periodic->job ++;
         // printf("%d \t # Task 1 OSTimeDly:%d\n", OSTimeGet(), kevin_task1_periodic->deadline - OSTimeGet()); // debug
@@ -289,6 +354,9 @@ void task1(void* p_arg) {
     }
 }
 
+/****************************************************************************************************
+*                      task2
+* **************************************************************************************************/
 void task2(void* p_arg) {
     (void)p_arg;
     INT8U err;
@@ -297,31 +365,50 @@ void task2(void* p_arg) {
         // printf("Hello from task2\n");
         // while (1); // kevin 讓他一直卡在裡面 靠OSintexit來切
 
+        if(!(OSTimeGet()))
+            printf("%d \t Task %d\n", OSTimeGet(), OSTCBHighRdy->OSTCBPrio);
         kevin_task2_periodic->deadline = kevin_task2_periodic->arrival + kevin_task2_periodic->period * (kevin_task2_periodic->job + 1);
         // printf("%d \t # Task 2 deadline:%d\n", OSTimeGet(), kevin_task2_periodic->deadline); // debug
 
+        /****************************************************************************************************
+         *                      Example task set 0
+         * **************************************************************************************************/
+        #if kevin_task_set == 0u
         // printf("%d \t Task 2\n", OSTimeGet()); // Original change to show when context switch
-        mywait(2, 2);
+        mywait(2);
+        lock_R1();
+        mywait(3);
+        lock_R2();
+        mywait(1);
+        unlock_R2();
+        mywait(1);
+        unlock_R1();
+        mywait(1);
+        #endif
 
-        printf("%d \t Task 2 get R1\n", OSTimeGet());
-        OSMutexPend(R1, 0, &err);
-        OSSchedLock();
-        mywait(3, 2);
+        /****************************************************************************************************
+         *                      task set 1
+         * **************************************************************************************************/
+        #if kevin_task_set == 1u
+        // printf("%d \t Task 2\n", OSTimeGet()); // Original change to show when context switch
+        mywait(3);
+        #endif
 
-        printf("%d \t Task 2 get R2\n", OSTimeGet());
-        OSMutexPend(R2, 0, &err);
-        OSSchedLock();
-        mywait(1, 2);
-
-        printf("%d \t Task 2 release R2\n", OSTimeGet());
-        OSMutexPost(R2, 0, &err);
-        OSSchedUnlock();
-        mywait(1, 2);
-
-        printf("%d \t Task 2 release R1\n", OSTimeGet());
-        OSMutexPost(R1, 0, &err);
-        OSSchedUnlock();
-        mywait(1, 2);
+        /****************************************************************************************************
+         *                      task set 2
+         * **************************************************************************************************/
+        #if kevin_task_set == 2u
+        // printf("%d \t Task 2\n", OSTimeGet()); // Original change to show when context switch
+        mywait(1);
+        lock_R2();
+        mywait(3);
+        lock_R1();
+        mywait(2);
+        unlock_R1();
+        unlock_R2();
+        mywait(1);
+        #endif
+        /*****************************************************************************************************/
 
         kevin_task2_periodic->job ++;
         // printf("%d \t # Task 2 OSTimeDly:%d\n", OSTimeGet(), kevin_task2_periodic->deadline - OSTimeGet()); // debug
@@ -329,18 +416,49 @@ void task2(void* p_arg) {
     }
 }
 
+/****************************************************************************************************
+*                      task3
+* **************************************************************************************************/
 void task3(void* p_arg) {
     (void)p_arg;
+    INT8U err;
+    OSTimeDly(kevin_task3_periodic->arrival);
     while (1) {
         // printf("Hello from task3\n");
-        while (1); // kevin 讓他一直卡在裡面 靠OSintexit來切
+        // while (1); // kevin 讓他一直卡在裡面 靠OSintexit來切
+
+        if(!(OSTimeGet()))
+            printf("%d \t Task %d\n", OSTimeGet(), OSTCBHighRdy->OSTCBPrio);
+        kevin_task3_periodic->deadline = kevin_task3_periodic->arrival + kevin_task3_periodic->period * (kevin_task3_periodic->job + 1);
+        // printf("%d \t # Task 2 deadline:%d\n", OSTimeGet(), kevin_task3_periodic->deadline); // debug
+
+        
+        /****************************************************************************************************
+         *                      task set 1
+         * **************************************************************************************************/
+        #if kevin_task_set == 1u
+        // printf("%d \t Task 2\n", OSTimeGet()); // Original change to show when context switch
+        mywait(1);
+        lock_R2();
+        mywait(5);
+        unlock_R2();
+        mywait(1);
+        #endif
+        /*****************************************************************************************************/
+        
+        kevin_task3_periodic->job ++;
+        // printf("%d \t # Task 2 OSTimeDly:%d\n", OSTimeGet(), kevin_task3_periodic->deadline - OSTimeGet()); // debug
+        OSTimeDly(kevin_task3_periodic->deadline - OSTimeGet());
     }
 }
 
+/****************************************************************************************************
+*                      task4
+* **************************************************************************************************/
 void task4(void* p_arg) {
     (void)p_arg;
     while (1) {
         // printf("Hello from task4\n");
-        while (1); // kevin 讓他一直卡在裡面 靠OSintexit來切
+        // while (1); // kevin 讓他一直卡在裡面 靠OSintexit來切
     }
 }
