@@ -479,7 +479,7 @@ void  OSMutexPend (OS_EVENT  *pevent,
 #if OS_CRITICAL_METHOD == 3u                               /* Allocate storage for CPU status register */
     OS_CPU_SR  cpu_sr = 0u;
 #endif
-    printf("test\n");
+
 
 #ifdef OS_SAFETY_CRITICAL
     if (perr == (INT8U *)0) {
@@ -511,7 +511,7 @@ void  OSMutexPend (OS_EVENT  *pevent,
         *perr = OS_ERR_PEND_LOCKED;                        /* ... can't PEND when locked               */
         OS_TRACE_MUTEX_PEND_EXIT(*perr);
         return;
-    }
+    }printf("test1\n");
 
     OS_ENTER_CRITICAL();
     pcp = (INT8U)(pevent->OSEventCnt >> 8u);               /* Get PCP from mutex                       */
@@ -530,7 +530,7 @@ void  OSMutexPend (OS_EVENT  *pevent,
         }
         OS_TRACE_MUTEX_PEND_EXIT(*perr);
         return;
-    }
+    }printf("test2\n");
     if (pcp != OS_PRIO_MUTEX_CEIL_DIS) {
         mprio = (INT8U)(pevent->OSEventCnt & OS_MUTEX_KEEP_LOWER_8); /*  Get priority of mutex owner   */
         ptcb  = (OS_TCB *)(pevent->OSEventPtr);                   /*     Point to TCB of mutex owner   */
