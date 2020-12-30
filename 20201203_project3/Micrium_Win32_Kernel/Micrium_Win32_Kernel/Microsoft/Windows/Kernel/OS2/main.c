@@ -269,33 +269,37 @@ void mywait(int tick)
 void lock_R1() {
     INT8U err;
     printf("%d \t Task %d get R1\n", OSTimeGet(), OSTCBCur->OSTCBId);
-    OSMutexPend(R1, 0, &err);
-    #if(kevin_part == 1)
+    #if kevin_part == 1u
     OSSchedLock();
+    #elif kevin_part == 2u
+    OSMutexPend(R1, 0, &err);
     #endif
 }
 void unlock_R1() {
     INT8U err;
     printf("%d \t Task %d release R1\n", OSTimeGet(), OSTCBCur->OSTCBId);
-    OSMutexPost(R1, 0, &err);
-    #if(kevin_part == 1)
+    #if kevin_part == 1u
     OSSchedUnlock();
+    #elif kevin_part == 2u
+    OSMutexPend(R1, 0, &err);
     #endif
 }
 void lock_R2() {
     INT8U err;
     printf("%d \t Task %d get R2\n", OSTimeGet(), OSTCBCur->OSTCBId);
-    OSMutexPend(R2, 0, &err);
-    #if(kevin_part == 1)
+    #if kevin_part == 1u
     OSSchedLock();
+    #elif kevin_part == 2u
+    OSMutexPend(R1, 0, &err);
     #endif
 }
 void unlock_R2() {
     INT8U err;
     printf("%d \t Task %d release R2\n", OSTimeGet(), OSTCBCur->OSTCBId);
-    OSMutexPost(R2, 0, &err);
-    #if(kevin_part == 1)
+    #if kevin_part == 1u
     OSSchedUnlock();
+    #elif kevin_part == 2u
+    OSMutexPend(R1, 0, &err);
     #endif
 }
 
@@ -316,14 +320,26 @@ void task1(void* p_arg) {
         // printf("%d \t # Task 1 deadline:%d\n", OSTimeGet(), kevin_task1_periodic->deadline); // debug
 
         /****************************************************************************************************
-         *                      Example task set 0
+         *                      Example task set 1
          * **************************************************************************************************/
-        #if kevin_task_set == 0u
+        #if kevin_task_set == 0u && kevin_example_task_set == 1u
         // printf("%d \t Task 1\n", OSTimeGet()); // Original change to show when context switch
         mywait(1);
         lock_R2();
         mywait(2);
         unlock_R2();
+        mywait(1);
+        #endif
+
+        /****************************************************************************************************
+         *                      Example task set 2
+         * **************************************************************************************************/
+        #if kevin_task_set == 0u && kevin_example_task_set == 2u
+        // printf("%d \t Task 1\n", OSTimeGet()); // Original change to show when context switch
+        mywait(1);
+        lock_R1();
+        mywait(2);
+        unlock_R1();
         mywait(1);
         #endif
 
@@ -379,9 +395,9 @@ void task2(void* p_arg) {
         // printf("%d \t # Task 2 deadline:%d\n", OSTimeGet(), kevin_task2_periodic->deadline); // debug
 
         /****************************************************************************************************
-         *                      Example task set 0
+         *                      Example task set 1
          * **************************************************************************************************/
-        #if kevin_task_set == 0u
+        #if kevin_task_set == 0u && kevin_example_task_set == 1u
         // printf("%d \t Task 2\n", OSTimeGet()); // Original change to show when context switch
         mywait(2);
         lock_R1();
@@ -390,6 +406,21 @@ void task2(void* p_arg) {
         mywait(1);
         unlock_R2();
         mywait(1);
+        unlock_R1();
+        mywait(1);
+        #endif
+
+        /****************************************************************************************************
+         *                      Example task set 2
+         * **************************************************************************************************/
+        #if kevin_task_set == 0u && kevin_example_task_set == 2u
+        // printf("%d \t Task 2\n", OSTimeGet()); // Original change to show when context switch
+        mywait(1);
+        lock_R1();
+        mywait(3);
+        lock_R2();
+        mywait(2);
+        unlock_R2();
         unlock_R1();
         mywait(1);
         #endif

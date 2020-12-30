@@ -2179,7 +2179,7 @@ void Kevin_OSInit(void){
     kevin_task3_periodic = &kevin_arr_task_periodic[3];
     kevin_task4_periodic = &kevin_arr_task_periodic[4];
 
-    #if(kevin_task_set == 0u)
+    #if kevin_task_set == 0u && kevin_example_task_set == 1u
     kevin_task1_periodic->arrival =     3;
     kevin_task1_periodic->execution =   4;
     kevin_task1_periodic->period =      25;
@@ -2187,7 +2187,15 @@ void Kevin_OSInit(void){
     kevin_task2_periodic->arrival =     0;
     kevin_task2_periodic->execution =   8;
     kevin_task2_periodic->period =      27;
-    #elif(kevin_task_set == 1u)
+    #elif kevin_task_set == 0u && kevin_example_task_set == 2u
+    kevin_task1_periodic->arrival =     3;
+    kevin_task1_periodic->execution =   4;
+    kevin_task1_periodic->period =      26;
+
+    kevin_task2_periodic->arrival =     0;
+    kevin_task2_periodic->execution =   7;
+    kevin_task2_periodic->period =      27;
+    #elif kevin_task_set == 1u
     kevin_task1_periodic->arrival =     2;
     kevin_task1_periodic->execution =   5;
     kevin_task1_periodic->period =      30;
@@ -2195,7 +2203,7 @@ void Kevin_OSInit(void){
     kevin_task2_periodic->arrival =     3;
     kevin_task2_periodic->execution =   3;
     kevin_task2_periodic->period =      60;
-    #elif(kevin_task_set == 2u)
+    #elif kevin_task_set == 2u
     kevin_task1_periodic->arrival =     2;
     kevin_task1_periodic->execution =   6;
     kevin_task1_periodic->period =      30;
@@ -2221,7 +2229,7 @@ void Kevin_OSInit(void){
     kevin_arr_aperiodic[1].execution =  2;
     kevin_arr_aperiodic[1].period =     39;
 
-    #if(kevin_task_set == 0u || kevin_task_set == 2u)
+    #if kevin_task_set == 0u || kevin_task_set == 2u
     kevin_task_num =        2;
     #elif(kevin_task_set == 1u)
     kevin_task_num =        3;
@@ -2230,7 +2238,11 @@ void Kevin_OSInit(void){
     kevin_aperiodic_num =   0;
     kevin_aperiodic_us =    0.2;
     
-    printf("part%d task_set%d => ", kevin_part, kevin_task_set);
+    printf("part%d task_set%d ", kevin_part, kevin_task_set);
+    #if kevin_task_set == 0u
+        printf("example:%d", kevin_example_task_set);
+    #endif
+    printf("\n");
 
     // kevin print task seting
     for(int i = 1; i <= kevin_task_num; i++)
