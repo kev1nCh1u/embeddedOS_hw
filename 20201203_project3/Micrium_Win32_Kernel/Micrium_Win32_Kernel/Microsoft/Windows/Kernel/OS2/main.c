@@ -48,17 +48,17 @@
 */
 
 #define TASK_STACKSIZE   2048
-#define TASK1_PRIORITY   3      // kevin 設多少都沒差後面會改
-#define TASK2_PRIORITY   4      // kevin 設多少都沒差後面會改
-#define TASK3_PRIORITY   3      // kevin 設多少都沒差後面會改
-#define TASK4_PRIORITY   4      // kevin 設多少都沒差後面會改
+#define TASK1_PRIORITY   2
+#define TASK2_PRIORITY   4
+#define TASK3_PRIORITY   3
+#define TASK4_PRIORITY   4
 #define TASK1_ID         1
 #define TASK2_ID         2
 #define TASK3_ID         3
 #define TASK4_ID         4
 
 #define R1_PRIO 1
-#define R2_PRIO 2
+#define R2_PRIO 3
 /*
 *********************************************************************************************************
 *                                       LOCAL GLOBAL VARIABLES
@@ -281,7 +281,7 @@ void unlock_R1() {
     #if kevin_part == 1u
     OSSchedUnlock();
     #elif kevin_part == 2u
-    OSMutexPend(R1, 0, &err);
+    OSMutexPost(R1);
     #endif
 }
 void lock_R2() {
@@ -290,7 +290,7 @@ void lock_R2() {
     #if kevin_part == 1u
     OSSchedLock();
     #elif kevin_part == 2u
-    OSMutexPend(R1, 0, &err);
+    OSMutexPend(R2, 0, &err);
     #endif
 }
 void unlock_R2() {
@@ -299,7 +299,7 @@ void unlock_R2() {
     #if kevin_part == 1u
     OSSchedUnlock();
     #elif kevin_part == 2u
-    OSMutexPend(R1, 0, &err);
+    OSMutexPost(R2);
     #endif
 }
 

@@ -2238,7 +2238,7 @@ void Kevin_OSInit(void){
     kevin_aperiodic_num =   0;
     kevin_aperiodic_us =    0.2;
     
-    printf("part%d task_set%d ", kevin_part, kevin_task_set);
+    printf("part:%d task_set:%d ", kevin_part, kevin_task_set);
     #if kevin_task_set == 0u
         printf("example:%d", kevin_example_task_set);
     #endif
@@ -2278,7 +2278,11 @@ void Kevin_StartContextSwitches(void) {
     // printf("\nTick \t Event \t \t CurrentTask ID \t NextTask ID \t ResponseTime \t # of ContextSwitch \n"); // kevin title
 
     // kevin project3 title
-    printf("\nTick \t Event \t \n"); // kevin title
+    printf("\nTick \t Event \t");
+    #if kevin_part == 2u
+        printf("\t Prio_Inheritance");
+    #endif
+    printf("\n");
 }
 
 /**********************************************************************************************************
