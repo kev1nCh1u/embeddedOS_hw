@@ -57,8 +57,8 @@
 #define TASK3_ID         3
 #define TASK4_ID         4
 
-#define R1_PRIO 3
-#define R2_PRIO 1
+#define R1_PRIO 1
+#define R2_PRIO 3
 /*
 *********************************************************************************************************
 *                                       LOCAL GLOBAL VARIABLES
@@ -274,6 +274,7 @@ void lock_R1() {
     #elif kevin_part == 2u
     // OSMutexPend(R1, 0, &err);
     INT8U prioVar = OSTCBCur->OSTCBPrio;
+    OSTCBCur->OrgPrio1 = 0;
     if(OSTCBCur->OSTCBPrio > R1_PRIO)
     {
         prioVar = R1_PRIO;
@@ -281,7 +282,7 @@ void lock_R1() {
     printf("%d \t Task %d get R1     \t %d->%d \n", OSTimeGet(), OSTCBCur->OSTCBId, OSTCBCur->OSTCBPrio, prioVar);
     if(prioVar != OSTCBCur->OSTCBPrio)
     {
-        OSTCBCur->OrgPrio = OSTCBCur->OSTCBPrio;
+        OSTCBCur->OrgPrio1 = OSTCBCur->OSTCBPrio;
         OSTaskChangePrio(OSTCBCur->OSTCBPrio, R1_PRIO);
     }
     OSTCBCur->InheCnt++;
@@ -295,6 +296,7 @@ void lock_R2() {
     #elif kevin_part == 2u
     // OSMutexPend(R2, 0, &err);
     INT8U prioVar = OSTCBCur->OSTCBPrio;
+    OSTCBCur->OrgPrio2 = 0;
     if(OSTCBCur->OSTCBPrio > R2_PRIO)
     {
         prioVar = R2_PRIO;
@@ -302,7 +304,7 @@ void lock_R2() {
     printf("%d \t Task %d get R2     \t %d->%d \n", OSTimeGet(), OSTCBCur->OSTCBId, OSTCBCur->OSTCBPrio, prioVar);
     if(prioVar != OSTCBCur->OSTCBPrio)
     {
-        OSTCBCur->OrgPrio = OSTCBCur->OSTCBPrio;
+        OSTCBCur->OrgPrio2 = OSTCBCur->OSTCBPrio;
         OSTaskChangePrio(OSTCBCur->OSTCBPrio, R2_PRIO);
     }
     OSTCBCur->InheCnt++;
@@ -317,9 +319,10 @@ void unlock_R1() {
     // OSMutexPost(R1);
     INT8U prioVar = OSTCBCur->OSTCBPrio;
     OSTCBCur->InheCnt--;
-    if(OSTCBCur->InheCnt == 0)
+    // if(OSTCBCur->InheCnt == 0)
+    if(OSTCBCur->OrgPrio1 != 0)
     {
-        prioVar = OSTCBCur->OrgPrio;
+        prioVar = OSTCBCur->OrgPrio1;
     }
     printf("%d \t Task %d release R1 \t %d->%d \n", OSTimeGet(), OSTCBCur->OSTCBId, OSTCBCur->OSTCBPrio, prioVar);
     if(prioVar != OSTCBCur->OSTCBPrio)
@@ -337,9 +340,10 @@ void unlock_R2() {
     // OSMutexPost(R2);
     INT8U prioVar = OSTCBCur->OSTCBPrio;
     OSTCBCur->InheCnt--;
-    if(OSTCBCur->InheCnt == 0)
+    // if(OSTCBCur->InheCnt == 0)
+    if(OSTCBCur->OrgPrio2 != 0)
     {
-        prioVar = OSTCBCur->OrgPrio;
+        prioVar = OSTCBCur->OrgPrio2;
     }
     printf("%d \t Task %d release R2 \t %d->%d \n", OSTimeGet(), OSTCBCur->OSTCBId, OSTCBCur->OSTCBPrio, prioVar);
     if(prioVar != OSTCBCur->OSTCBPrio)

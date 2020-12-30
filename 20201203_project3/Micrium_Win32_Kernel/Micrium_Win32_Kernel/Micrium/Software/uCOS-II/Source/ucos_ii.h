@@ -565,7 +565,7 @@ typedef struct os_stk_data {
 *********************************************************************************************************
 */
 
-typedef struct os_tcb { // kevin
+typedef struct os_tcb {
     OS_STK          *OSTCBStkPtr;           /* Pointer to current top of stack                         */
 
 #if OS_TASK_CREATE_EXT_EN > 0u
@@ -634,7 +634,8 @@ typedef struct os_tcb { // kevin
     INT32U           OSTCBRegTbl[OS_TASK_REG_TBL_SIZE];
 #endif
     // kevin
-    INT8U           OrgPrio;
+    INT8U           OrgPrio1;
+    INT8U           OrgPrio2;
     INT8U           InheCnt;
 } OS_TCB;
 
@@ -821,7 +822,7 @@ float kevin_aperiodic_us;
 
 #define kevin_part              2u // part set
 #define kevin_task_set          0u // task set
-#define kevin_example_task_set  1u // example task set
+#define kevin_example_task_set  2u // example task set
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
