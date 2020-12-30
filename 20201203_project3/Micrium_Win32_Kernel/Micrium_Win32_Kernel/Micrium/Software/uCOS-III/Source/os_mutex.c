@@ -361,8 +361,6 @@ void  OSMutexPend (OS_MUTEX  *p_mutex,
     OS_TCB  *p_tcb;
     CPU_SR_ALLOC();
 
-    printf("OSMutexPend\n");
-
 #if (OS_CFG_TS_EN == DEF_DISABLED)
     (void)p_ts;                                                 /* Prevent compiler warning for not using 'ts'          */
 #endif
@@ -598,7 +596,6 @@ OS_OBJ_QTY  OSMutexPendAbort (OS_MUTEX  *p_mutex,
     OS_OBJ_QTY     nbr_tasks;
     OS_PRIO        prio_new;
     CPU_SR_ALLOC();
-
 
 #ifdef OS_SAFETY_CRITICAL
     if (p_err == (OS_ERR *)0) {

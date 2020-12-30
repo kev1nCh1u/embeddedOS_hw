@@ -479,7 +479,7 @@ void  OSMutexPend (OS_EVENT  *pevent,
 #if OS_CRITICAL_METHOD == 3u                               /* Allocate storage for CPU status register */
     OS_CPU_SR  cpu_sr = 0u;
 #endif
-
+    printf("test\n");
 
 #ifdef OS_SAFETY_CRITICAL
     if (perr == (INT8U *)0) {
@@ -557,7 +557,7 @@ void  OSMutexPend (OS_EVENT  *pevent,
                 ptcb->OSTCBPrio = pcp;                     /* Change owner task prio to PCP            */
                 
                 OS_TRACE_MUTEX_TASK_PRIO_INHERIT(ptcb, pcp);
-                
+              
 #if OS_LOWEST_PRIO <= 63u
                 ptcb->OSTCBY    = (INT8U)( ptcb->OSTCBPrio >> 3u);
                 ptcb->OSTCBX    = (INT8U)( ptcb->OSTCBPrio & 0x07u);
@@ -581,7 +581,7 @@ void  OSMutexPend (OS_EVENT  *pevent,
                 OSTCBPrioTbl[pcp] = ptcb;
             }
         }
-    }
+    }printf("pcp:%d mprio:%d\n", pcp, mprio);
     OSTCBCur->OSTCBStat     |= OS_STAT_MUTEX;         /* Mutex not available, pend current task        */
     OSTCBCur->OSTCBStatPend  = OS_STAT_PEND_OK;
     OSTCBCur->OSTCBDly       = timeout;               /* Store timeout in current task's TCB           */
