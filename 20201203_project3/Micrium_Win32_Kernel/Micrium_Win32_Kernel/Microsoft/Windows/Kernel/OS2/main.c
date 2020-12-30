@@ -268,37 +268,41 @@ void mywait(int tick)
 
 void lock_R1() {
     INT8U err;
-    printf("%d \t Task %d get R1\n", OSTimeGet(), OSTCBCur->OSTCBId);
     #if kevin_part == 1u
+    printf("%d \t Task %d get R1 \n", OSTimeGet(), OSTCBCur->OSTCBId);
     OSSchedLock();
     #elif kevin_part == 2u
+    printf("%d \t Task %d get R1 \n", OSTimeGet(), OSTCBCur->OSTCBId);
     OSMutexPend(R1, 0, &err);
     #endif
 }
 void unlock_R1() {
     INT8U err;
-    printf("%d \t Task %d release R1\n", OSTimeGet(), OSTCBCur->OSTCBId);
     #if kevin_part == 1u
+    printf("%d \t Task %d release R1 \n", OSTimeGet(), OSTCBCur->OSTCBId);
     OSSchedUnlock();
     #elif kevin_part == 2u
+    printf("%d \t Task %d release R1 \n", OSTimeGet(), OSTCBCur->OSTCBId);
     OSMutexPost(R1);
     #endif
 }
 void lock_R2() {
     INT8U err;
-    printf("%d \t Task %d get R2\n", OSTimeGet(), OSTCBCur->OSTCBId);
     #if kevin_part == 1u
+    printf("%d \t Task %d get R2 \n", OSTimeGet(), OSTCBCur->OSTCBId);
     OSSchedLock();
     #elif kevin_part == 2u
+    printf("%d \t Task %d get R2 \n", OSTimeGet(), OSTCBCur->OSTCBId);
     OSMutexPend(R2, 0, &err);
     #endif
 }
 void unlock_R2() {
     INT8U err;
-    printf("%d \t Task %d release R2\n", OSTimeGet(), OSTCBCur->OSTCBId);
     #if kevin_part == 1u
+    printf("%d \t Task %d release R2 \n", OSTimeGet(), OSTCBCur->OSTCBId);
     OSSchedUnlock();
     #elif kevin_part == 2u
+    printf("%d \t Task %d release R2 \n", OSTimeGet(), OSTCBCur->OSTCBId);
     OSMutexPost(R2);
     #endif
 }

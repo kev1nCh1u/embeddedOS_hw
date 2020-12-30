@@ -361,6 +361,7 @@ void  OSMutexPend (OS_MUTEX  *p_mutex,
     OS_TCB  *p_tcb;
     CPU_SR_ALLOC();
 
+    printf("OSMutexPend\n");
 
 #if (OS_CFG_TS_EN == DEF_DISABLED)
     (void)p_ts;                                                 /* Prevent compiler warning for not using 'ts'          */
