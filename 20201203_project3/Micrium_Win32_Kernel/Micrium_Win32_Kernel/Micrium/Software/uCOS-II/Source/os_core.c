@@ -2422,7 +2422,10 @@ void Kevin_ContextSwitches(void) {
 
     // print next task
     if(OSTimeGet())
-        printf("%d \t Task %d\n", OSTimeGet(), OSTCBHighRdy->OSTCBPrio);
+        if(OSTCBHighRdy->OSTCBPrio == 63)
+            printf("%d \t Task %d\n", OSTimeGet(), OSTCBHighRdy->OSTCBPrio);
+        else
+            printf("%d \t Task %d\n", OSTimeGet(), OSTCBHighRdy->OSTCBId);
     
 }
 

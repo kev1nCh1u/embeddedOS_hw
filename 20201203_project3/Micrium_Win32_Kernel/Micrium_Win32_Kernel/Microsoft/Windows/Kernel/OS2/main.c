@@ -48,8 +48,8 @@
 */
 
 #define TASK_STACKSIZE   2048
-#define TASK1_PRIORITY   1      // kevin 設多少都沒差後面會改
-#define TASK2_PRIORITY   2      // kevin 設多少都沒差後面會改
+#define TASK1_PRIORITY   3      // kevin 設多少都沒差後面會改
+#define TASK2_PRIORITY   4      // kevin 設多少都沒差後面會改
 #define TASK3_PRIORITY   3      // kevin 設多少都沒差後面會改
 #define TASK4_PRIORITY   4      // kevin 設多少都沒差後面會改
 #define TASK1_ID         1
@@ -58,7 +58,7 @@
 #define TASK4_ID         4
 
 #define R1_PRIO 1
-#define R2_PRIO 1
+#define R2_PRIO 2
 /*
 *********************************************************************************************************
 *                                       LOCAL GLOBAL VARIABLES
@@ -239,7 +239,7 @@ void mywait(int tick)
     // now = OSTimeGet(); // Original but it will miss when interrupt
     // exit = now + tick; // Original but it will miss when interrupt
     last = OSTimeGet();
-    taskNum = OSTCBHighRdy->OSTCBPrio; 
+    taskNum = OSTCBCur->OSTCBId; 
     OS_EXIT_CRITICAL();
     while (1)
     {
@@ -268,7 +268,7 @@ void mywait(int tick)
 
 void lock_R1() {
     INT8U err;
-    printf("%d \t Task %d get R1\n", OSTimeGet(), OSTCBHighRdy->OSTCBPrio);
+    printf("%d \t Task %d get R1\n", OSTimeGet(), OSTCBCur->OSTCBId);
     OSMutexPend(R1, 0, &err);
     #if(kevin_part == 1)
     OSSchedLock();
@@ -276,7 +276,7 @@ void lock_R1() {
 }
 void unlock_R1() {
     INT8U err;
-    printf("%d \t Task %d release R1\n", OSTimeGet(), OSTCBHighRdy->OSTCBPrio);
+    printf("%d \t Task %d release R1\n", OSTimeGet(), OSTCBCur->OSTCBId);
     OSMutexPost(R1, 0, &err);
     #if(kevin_part == 1)
     OSSchedUnlock();
@@ -284,7 +284,7 @@ void unlock_R1() {
 }
 void lock_R2() {
     INT8U err;
-    printf("%d \t Task %d get R2\n", OSTimeGet(), OSTCBHighRdy->OSTCBPrio);
+    printf("%d \t Task %d get R2\n", OSTimeGet(), OSTCBCur->OSTCBId);
     OSMutexPend(R2, 0, &err);
     #if(kevin_part == 1)
     OSSchedLock();
@@ -292,7 +292,7 @@ void lock_R2() {
 }
 void unlock_R2() {
     INT8U err;
-    printf("%d \t Task %d release R2\n", OSTimeGet(), OSTCBHighRdy->OSTCBPrio);
+    printf("%d \t Task %d release R2\n", OSTimeGet(), OSTCBCur->OSTCBId);
     OSMutexPost(R2, 0, &err);
     #if(kevin_part == 1)
     OSSchedUnlock();
@@ -311,7 +311,7 @@ void task1(void* p_arg) {
         // while (1); // kevin 讓他一直卡在裡面 靠OSintexit來切
         
         if(!(OSTimeGet()))
-            printf("%d \t Task %d\n", OSTimeGet(), OSTCBHighRdy->OSTCBPrio);
+            printf("%d \t Task %d\n", OSTimeGet(), OSTCBCur->OSTCBId);
         kevin_task1_periodic->deadline = kevin_task1_periodic->arrival + kevin_task1_periodic->period * (kevin_task1_periodic->job + 1);
         // printf("%d \t # Task 1 deadline:%d\n", OSTimeGet(), kevin_task1_periodic->deadline); // debug
 
@@ -374,7 +374,7 @@ void task2(void* p_arg) {
         // while (1); // kevin 讓他一直卡在裡面 靠OSintexit來切
 
         if(!(OSTimeGet()))
-            printf("%d \t Task %d\n", OSTimeGet(), OSTCBHighRdy->OSTCBPrio);
+            printf("%d \t Task %d\n", OSTimeGet(), OSTCBCur->OSTCBId);
         kevin_task2_periodic->deadline = kevin_task2_periodic->arrival + kevin_task2_periodic->period * (kevin_task2_periodic->job + 1);
         // printf("%d \t # Task 2 deadline:%d\n", OSTimeGet(), kevin_task2_periodic->deadline); // debug
 
@@ -436,7 +436,7 @@ void task3(void* p_arg) {
         // while (1); // kevin 讓他一直卡在裡面 靠OSintexit來切
 
         if(!(OSTimeGet()))
-            printf("%d \t Task %d\n", OSTimeGet(), OSTCBHighRdy->OSTCBPrio);
+            printf("%d \t Task %d\n", OSTimeGet(), OSTCBCur->OSTCBId);
         kevin_task3_periodic->deadline = kevin_task3_periodic->arrival + kevin_task3_periodic->period * (kevin_task3_periodic->job + 1);
         // printf("%d \t # Task 2 deadline:%d\n", OSTimeGet(), kevin_task3_periodic->deadline); // debug
 
