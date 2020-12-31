@@ -313,7 +313,6 @@ void lock_R(int rVar) {
         *OrgPrio = OSTCBCur->OSTCBPrio;
         OSTaskChangePrio(OSTCBCur->OSTCBPrio, R_PRIO);
     }
-    OSTCBCur->InheCnt++;
     #endif
 }
 
@@ -335,8 +334,6 @@ void unlock_R(int rVar) {
     }
     // OSMutexPost(R1);
     INT8U prioVar = OSTCBCur->OSTCBPrio;
-    OSTCBCur->InheCnt--;
-    // if(OSTCBCur->InheCnt == 0)
     if(*OrgPrio != 0)
     {
         prioVar = *OrgPrio;

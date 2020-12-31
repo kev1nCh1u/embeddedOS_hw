@@ -636,7 +636,6 @@ typedef struct os_tcb {
     // kevin
     INT8U           OrgPrio1;
     INT8U           OrgPrio2;
-    INT8U           InheCnt;
 } OS_TCB;
 
 
