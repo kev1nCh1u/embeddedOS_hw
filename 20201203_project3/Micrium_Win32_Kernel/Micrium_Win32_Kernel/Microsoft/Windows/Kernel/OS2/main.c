@@ -48,17 +48,38 @@
 */
 
 #define TASK_STACKSIZE   2048
+
+#if kevin_part == 1u
+#define TASK1_PRIORITY   1
+#define TASK2_PRIORITY   2
+#define TASK3_PRIORITY   3
+#elif kevin_part == 2u && kevin_task_set == 0u && kevin_example_task_set == 1u
 #define TASK1_PRIORITY   2
 #define TASK2_PRIORITY   4
-#define TASK3_PRIORITY   3
-#define TASK4_PRIORITY   4
+#define R1_PRIO 3
+#define R2_PRIO 1
+#elif kevin_part == 2u && kevin_task_set == 0u && kevin_example_task_set == 2u
+#define TASK1_PRIORITY   2
+#define TASK2_PRIORITY   4
+#define R1_PRIO 1
+#define R2_PRIO 3
+#elif kevin_part == 2u && kevin_task_set == 1u
+#define TASK1_PRIORITY   2
+#define TASK2_PRIORITY   3
+#define TASK3_PRIORITY   5
+#define R1_PRIO 1
+#define R2_PRIO 4
+#elif kevin_part == 2u && kevin_task_set == 2u
+#define TASK1_PRIORITY   3
+#define TASK2_PRIORITY   4
+#define R1_PRIO 1
+#define R2_PRIO 2
+#endif
+
 #define TASK1_ID         1
 #define TASK2_ID         2
 #define TASK3_ID         3
-#define TASK4_ID         4
 
-#define R1_PRIO 1
-#define R2_PRIO 3
 /*
 *********************************************************************************************************
 *                                       LOCAL GLOBAL VARIABLES
@@ -70,10 +91,9 @@ static  OS_STK  StartupTaskStk[APP_CFG_STARTUP_TASK_STK_SIZE];
 static  OS_STK  Task1_STK[TASK_STACKSIZE];
 static  OS_STK  Task2_STK[TASK_STACKSIZE];
 static  OS_STK  Task3_STK[TASK_STACKSIZE];  // kevin
-static  OS_STK  Task4_STK[TASK_STACKSIZE];  // kevin
 
-OS_EVENT* R1;
-OS_EVENT* R2;
+// OS_EVENT* R1;
+// OS_EVENT* R2;
 /*
 *********************************************************************************************************
 *                                         FUNCTION PROTOTYPES
@@ -85,7 +105,6 @@ static  void  StartupTask (void  *p_arg);
 static void task1(void* p_arg);
 static void task2(void* p_arg);
 static void task3(void* p_arg); // kevin
-static void task4(void* p_arg); // kevin
 
 /*
 *********************************************************************************************************
@@ -154,6 +173,7 @@ int  main (void)
         0,
         (OS_TASK_OPT_STK_CHK | OS_TASK_OPT_STK_CLR));
 
+    #if kevin_part == 1u || (kevin_part == 2u && kevin_task_set == 0u && kevin_example_task_set == 1u)
     if(kevin_task_num >= 3) // kevin
         OSTaskCreateExt(task3,
             0,
@@ -164,16 +184,7 @@ int  main (void)
             TASK_STACKSIZE,
             0,
             (OS_TASK_OPT_STK_CHK | OS_TASK_OPT_STK_CLR));
-    if(kevin_task_num >= 4) // kevin
-        OSTaskCreateExt(task4,
-            0,
-            &Task4_STK[TASK_STACKSIZE - 1],
-            TASK4_PRIORITY,
-            TASK4_ID,
-            &Task4_STK[0],
-            TASK_STACKSIZE,
-            0,
-            (OS_TASK_OPT_STK_CHK | OS_TASK_OPT_STK_CLR));
+    #endif
 
     INT8U err;
     // R1 = OSMutexCreate(R1_PRIO, &err);
@@ -538,16 +549,5 @@ void task3(void* p_arg) {
         kevin_task3_periodic->job ++;
         // printf("%d \t # Task 2 OSTimeDly:%d\n", OSTimeGet(), kevin_task3_periodic->deadline - OSTimeGet()); // debug
         OSTimeDly(kevin_task3_periodic->deadline - OSTimeGet());
-    }
-}
-
-/****************************************************************************************************
-*                      task4
-* **************************************************************************************************/
-void task4(void* p_arg) {
-    (void)p_arg;
-    while (1) {
-        // printf("Hello from task4\n");
-        // while (1); // kevin 讓他一直卡在裡面 靠OSintexit來切
     }
 }
