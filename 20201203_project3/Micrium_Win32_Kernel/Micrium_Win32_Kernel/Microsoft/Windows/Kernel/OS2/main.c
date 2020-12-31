@@ -277,86 +277,71 @@ void mywait(int tick)
 *                      lock & unlock
 * **************************************************************************************************/
 
-void lock_R1() {
+void lock_R(int rVar) {
     INT8U err;
     #if kevin_part == 1u
-    printf("%d \t Task %d get R1 \n", OSTimeGet(), OSTCBCur->OSTCBId);
+    printf("%d \t Task %d get R%d \n", OSTimeGet(), OSTCBCur->OSTCBId, rVar);
     OSSchedLock();
     #elif kevin_part == 2u
+    int R_PRIO;
+    INT8U *OrgPrio;
+    if(rVar == 1)
+    {
+        R_PRIO = R1_PRIO;
+        OrgPrio = &(OSTCBCur->OrgPrio1);
+    }
+    else if (rVar == 2)
+    {
+        R_PRIO = R2_PRIO;
+        OrgPrio = &(OSTCBCur->OrgPrio2);
+    }
+    else
+    {   
+        printf("error! no rVar input\n");
+        while(1);
+    }
     // OSMutexPend(R1, 0, &err);
     INT8U prioVar = OSTCBCur->OSTCBPrio;
-    OSTCBCur->OrgPrio1 = 0;
-    if(OSTCBCur->OSTCBPrio > R1_PRIO)
+    *OrgPrio = 0;
+    if(OSTCBCur->OSTCBPrio > R_PRIO)
     {
-        prioVar = R1_PRIO;
+        prioVar = R_PRIO;
     }
-    printf("%d \t Task %d get R1     \t %d->%d \n", OSTimeGet(), OSTCBCur->OSTCBId, OSTCBCur->OSTCBPrio, prioVar);
+    printf("%d \t Task %d get R%d     \t %d->%d \n", OSTimeGet(), OSTCBCur->OSTCBId, rVar, OSTCBCur->OSTCBPrio, prioVar);
     if(prioVar != OSTCBCur->OSTCBPrio)
     {
-        OSTCBCur->OrgPrio1 = OSTCBCur->OSTCBPrio;
-        OSTaskChangePrio(OSTCBCur->OSTCBPrio, R1_PRIO);
+        *OrgPrio = OSTCBCur->OSTCBPrio;
+        OSTaskChangePrio(OSTCBCur->OSTCBPrio, R_PRIO);
     }
     OSTCBCur->InheCnt++;
     #endif
 }
-void lock_R2() {
+
+void unlock_R(int rVar) {
     INT8U err;
     #if kevin_part == 1u
-    printf("%d \t Task %d get R2 \n", OSTimeGet(), OSTCBCur->OSTCBId);
-    OSSchedLock();
-    #elif kevin_part == 2u
-    // OSMutexPend(R2, 0, &err);
-    INT8U prioVar = OSTCBCur->OSTCBPrio;
-    OSTCBCur->OrgPrio2 = 0;
-    if(OSTCBCur->OSTCBPrio > R2_PRIO)
-    {
-        prioVar = R2_PRIO;
-    }
-    printf("%d \t Task %d get R2     \t %d->%d \n", OSTimeGet(), OSTCBCur->OSTCBId, OSTCBCur->OSTCBPrio, prioVar);
-    if(prioVar != OSTCBCur->OSTCBPrio)
-    {
-        OSTCBCur->OrgPrio2 = OSTCBCur->OSTCBPrio;
-        OSTaskChangePrio(OSTCBCur->OSTCBPrio, R2_PRIO);
-    }
-    OSTCBCur->InheCnt++;
-    #endif
-}
-void unlock_R1() {
-    INT8U err;
-    #if kevin_part == 1u
-    printf("%d \t Task %d release R1 \n", OSTimeGet(), OSTCBCur->OSTCBId);
+    printf("%d \t Task %d release R%d \n", OSTimeGet(), OSTCBCur->OSTCBId, rVar);
     OSSchedUnlock();
     #elif kevin_part == 2u
+    INT8U *OrgPrio;
+    if(rVar == 1)
+        OrgPrio = &(OSTCBCur->OrgPrio1);
+    else if (rVar == 2)
+        OrgPrio = &(OSTCBCur->OrgPrio2);
+    else
+    {   
+        printf("error! no rVar input\n");
+        while(1);
+    }
     // OSMutexPost(R1);
     INT8U prioVar = OSTCBCur->OSTCBPrio;
     OSTCBCur->InheCnt--;
     // if(OSTCBCur->InheCnt == 0)
-    if(OSTCBCur->OrgPrio1 != 0)
+    if(*OrgPrio != 0)
     {
-        prioVar = OSTCBCur->OrgPrio1;
+        prioVar = *OrgPrio;
     }
-    printf("%d \t Task %d release R1 \t %d->%d \n", OSTimeGet(), OSTCBCur->OSTCBId, OSTCBCur->OSTCBPrio, prioVar);
-    if(prioVar != OSTCBCur->OSTCBPrio)
-    {
-        OSTaskChangePrio(OSTCBCur->OSTCBPrio, prioVar);
-    }
-    #endif
-}
-void unlock_R2() {
-    INT8U err;
-    #if kevin_part == 1u
-    printf("%d \t Task %d release R2 \n", OSTimeGet(), OSTCBCur->OSTCBId);
-    OSSchedUnlock();
-    #elif kevin_part == 2u
-    // OSMutexPost(R2);
-    INT8U prioVar = OSTCBCur->OSTCBPrio;
-    OSTCBCur->InheCnt--;
-    // if(OSTCBCur->InheCnt == 0)
-    if(OSTCBCur->OrgPrio2 != 0)
-    {
-        prioVar = OSTCBCur->OrgPrio2;
-    }
-    printf("%d \t Task %d release R2 \t %d->%d \n", OSTimeGet(), OSTCBCur->OSTCBId, OSTCBCur->OSTCBPrio, prioVar);
+    printf("%d \t Task %d release R%d \t %d->%d \n", OSTimeGet(), OSTCBCur->OSTCBId, rVar, OSTCBCur->OSTCBPrio, prioVar);
     if(prioVar != OSTCBCur->OSTCBPrio)
     {
         OSTaskChangePrio(OSTCBCur->OSTCBPrio, prioVar);
@@ -386,9 +371,9 @@ void task1(void* p_arg) {
         #if kevin_task_set == 0u && kevin_example_task_set == 1u
         // printf("%d \t Task 1\n", OSTimeGet()); // Original change to show when context switch
         mywait(1);
-        lock_R2();
+        lock_R2(2);
         mywait(2);
-        unlock_R2();
+        unlock_R(2);
         mywait(1);
         #endif
 
@@ -398,9 +383,9 @@ void task1(void* p_arg) {
         #if kevin_task_set == 0u && kevin_example_task_set == 2u
         // printf("%d \t Task 1\n", OSTimeGet()); // Original change to show when context switch
         mywait(1);
-        lock_R1();
+        lock_R(1);
         mywait(2);
-        unlock_R1();
+        unlock_R(1);
         mywait(1);
         #endif
 
@@ -410,9 +395,9 @@ void task1(void* p_arg) {
         #if kevin_task_set == 1u
         // printf("%d \t Task 2\n", OSTimeGet()); // Original change to show when context switch
         mywait(1);
-        lock_R1();
+        lock_R(1);
         mywait(3);
-        unlock_R1();
+        unlock_R(1);
         mywait(1);
         #endif
 
@@ -422,12 +407,12 @@ void task1(void* p_arg) {
         #if kevin_task_set == 2u
         // printf("%d \t Task 2\n", OSTimeGet()); // Original change to show when context switch
         mywait(1);
-        lock_R1();
+        lock_R(1);
         mywait(2);
-        lock_R2();
+        lock_R(2);
         mywait(2);
-        unlock_R2();
-        unlock_R1();
+        unlock_R(2);
+        unlock_R(1);
         mywait(1);
         #endif
         /*****************************************************************************************************/
@@ -461,13 +446,13 @@ void task2(void* p_arg) {
         #if kevin_task_set == 0u && kevin_example_task_set == 1u
         // printf("%d \t Task 2\n", OSTimeGet()); // Original change to show when context switch
         mywait(2);
-        lock_R1();
+        lock_R(1);
         mywait(3);
-        lock_R2();
+        lock_R(2);
         mywait(1);
-        unlock_R2();
+        unlock_R(2);
         mywait(1);
-        unlock_R1();
+        unlock_R(1);
         mywait(1);
         #endif
 
@@ -477,12 +462,12 @@ void task2(void* p_arg) {
         #if kevin_task_set == 0u && kevin_example_task_set == 2u
         // printf("%d \t Task 2\n", OSTimeGet()); // Original change to show when context switch
         mywait(1);
-        lock_R1();
+        lock_R(1);
         mywait(3);
-        lock_R2();
+        lock_R(2);
         mywait(2);
-        unlock_R2();
-        unlock_R1();
+        unlock_R(2);
+        unlock_R(1);
         mywait(1);
         #endif
 
@@ -500,12 +485,12 @@ void task2(void* p_arg) {
         #if kevin_task_set == 2u
         // printf("%d \t Task 2\n", OSTimeGet()); // Original change to show when context switch
         mywait(1);
-        lock_R2();
+        lock_R(2);
         mywait(3);
-        lock_R1();
+        lock_R(1);
         mywait(2);
-        unlock_R1();
-        unlock_R2();
+        unlock_R(1);
+        unlock_R(2);
         mywait(1);
         #endif
         /*****************************************************************************************************/
@@ -539,9 +524,9 @@ void task3(void* p_arg) {
         #if kevin_task_set == 1u
         // printf("%d \t Task 2\n", OSTimeGet()); // Original change to show when context switch
         mywait(1);
-        lock_R2();
+        lock_R(2);
         mywait(5);
-        unlock_R2();
+        unlock_R(2);
         mywait(1);
         #endif
         /*****************************************************************************************************/
