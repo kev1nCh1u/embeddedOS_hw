@@ -173,7 +173,7 @@ int  main (void)
         0,
         (OS_TASK_OPT_STK_CHK | OS_TASK_OPT_STK_CLR));
 
-    #if kevin_part == 1u || (kevin_part == 2u && kevin_task_set == 0u && kevin_example_task_set == 1u)
+    #if kevin_task_set == 1u
     if(kevin_task_num >= 3) // kevin
         OSTaskCreateExt(task3,
             0,
@@ -186,7 +186,7 @@ int  main (void)
             (OS_TASK_OPT_STK_CHK | OS_TASK_OPT_STK_CLR));
     #endif
 
-    INT8U err;
+    // INT8U err;
     // R1 = OSMutexCreate(R1_PRIO, &err);
     // R2 = OSMutexCreate(R2_PRIO, &err);
 
@@ -245,7 +245,8 @@ void mywait(int tick)
 #if OS_CRITICAL_METHOD == 3
     OS_CPU_SR cpu_sr = 0;
 #endif
-    int now, exit, last, diff, taskNum, count = 0;
+    // int now, exit;
+    int last, diff, taskNum, count = 0;
     OS_ENTER_CRITICAL();
     // now = OSTimeGet(); // Original but it will miss when interrupt
     // exit = now + tick; // Original but it will miss when interrupt
@@ -278,7 +279,7 @@ void mywait(int tick)
 * **************************************************************************************************/
 
 void lock_R(int rVar) {
-    INT8U err;
+    // INT8U err;
     #if kevin_part == 1u
     printf("%d \t Task %d get R%d \n", OSTimeGet(), OSTCBCur->OSTCBId, rVar);
     OSSchedLock();
@@ -317,7 +318,7 @@ void lock_R(int rVar) {
 }
 
 void unlock_R(int rVar) {
-    INT8U err;
+    // INT8U err;
     #if kevin_part == 1u
     printf("%d \t Task %d release R%d \n", OSTimeGet(), OSTCBCur->OSTCBId, rVar);
     OSSchedUnlock();
@@ -351,7 +352,7 @@ void unlock_R(int rVar) {
 * **************************************************************************************************/
 void task1(void* p_arg) {
     (void)p_arg;
-    INT8U err;
+    // INT8U err;
     OSTimeDly(kevin_task1_periodic->arrival);
     while (1) {
         // printf("Hello from task1\n");
@@ -368,7 +369,7 @@ void task1(void* p_arg) {
         #if kevin_task_set == 0u && kevin_example_task_set == 1u
         // printf("%d \t Task 1\n", OSTimeGet()); // Original change to show when context switch
         mywait(1);
-        lock_R2(2);
+        lock_R(2);
         mywait(2);
         unlock_R(2);
         mywait(1);
@@ -426,7 +427,7 @@ void task1(void* p_arg) {
 * **************************************************************************************************/
 void task2(void* p_arg) {
     (void)p_arg;
-    INT8U err;
+    // INT8U err;
     OSTimeDly(kevin_task2_periodic->arrival);
     while (1) {
         // printf("Hello from task2\n");
@@ -503,7 +504,7 @@ void task2(void* p_arg) {
 * **************************************************************************************************/
 void task3(void* p_arg) {
     (void)p_arg;
-    INT8U err;
+    // INT8U err;
     OSTimeDly(kevin_task3_periodic->arrival);
     while (1) {
         // printf("Hello from task3\n");
