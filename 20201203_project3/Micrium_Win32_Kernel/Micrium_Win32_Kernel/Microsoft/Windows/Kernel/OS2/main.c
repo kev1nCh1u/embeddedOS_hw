@@ -189,6 +189,8 @@ int  main (void)
     // INT8U err;
     // R1 = OSMutexCreate(R1_PRIO, &err);
     // R2 = OSMutexCreate(R2_PRIO, &err);
+    kevin_R1_PRIO = R1_PRIO;
+    kevin_R2_PRIO = R2_PRIO;
 
     OSTimeSet(0);    // kevin reset time
     OSStart();                                                  /* Start multitasking (i.e. give control to uC/OS-II)   */

@@ -2574,12 +2574,12 @@ void lock_R(int rVar) {
     INT8U *OrgPrio;
     if(rVar == 1)
     {
-        R_PRIO = R1_PRIO;
+        R_PRIO = kevin_R1_PRIO;
         OrgPrio = &(OSTCBCur->OrgPrio1);
     }
     else if (rVar == 2)
     {
-        R_PRIO = R2_PRIO;
+        R_PRIO = kevin_R2_PRIO;
         OrgPrio = &(OSTCBCur->OrgPrio2);
     }
     else
@@ -2650,7 +2650,7 @@ void taskStart()
     if(!(OSTimeGet()))
         printf("%d \t Task %d\n", OSTimeGet(), OSTCBCur->OSTCBId);
     kevin_arr_task_periodic[OSTCBCur->OSTCBId].deadline = kevin_arr_task_periodic[OSTCBCur->OSTCBId].arrival + kevin_arr_task_periodic[OSTCBCur->OSTCBId].period * (kevin_arr_task_periodic[OSTCBCur->OSTCBId].job + 1);
-    // printf("%d \t # Task 1 deadline:%d\n", OSTimeGet(), kevin_arr_task_periodic[OSTCBCur->OSTCBId].deadline); // debug
+    // printf("%d \t # Task%d deadline:%d\n", OSTimeGet(), OSTCBCur->OSTCBId, kevin_arr_task_periodic[OSTCBCur->OSTCBId].deadline); // debug
 }
 
 /****************************************************************************************************
@@ -2659,7 +2659,9 @@ void taskStart()
 void taskEnd()
 {
     kevin_arr_task_periodic[OSTCBCur->OSTCBId].job ++;
-    // printf("%d \t # Task 1 OSTimeDly:%d\n", OSTimeGet(), kevin_arr_task_periodic[OSTCBCur->OSTCBId].deadline - OSTimeGet()); // debug
+    kevin_arr_task_periodic[OSTCBCur->OSTCBId].response = OSTimeGet() - kevin_arr_task_periodic[OSTCBCur->OSTCBId].response; 
+    // printf("%d \t # Task%d OSTimeDly:%d\n", OSTimeGet(), OSTCBCur->OSTCBId, kevin_arr_task_periodic[OSTCBCur->OSTCBId].deadline - OSTimeGet()); // debug
+    printf("%d \t # Task%d finish response:%d context:%d\n", OSTimeGet(), OSTCBCur->OSTCBId, kevin_arr_task_periodic[OSTCBCur->OSTCBId].response, kevin_arr_task_periodic[OSTCBCur->OSTCBId].context); // debug
     OSTimeDly(kevin_arr_task_periodic[OSTCBCur->OSTCBId].deadline - OSTimeGet());
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
