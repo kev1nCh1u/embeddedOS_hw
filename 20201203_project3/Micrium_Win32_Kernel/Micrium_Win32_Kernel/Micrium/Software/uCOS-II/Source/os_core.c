@@ -2179,6 +2179,7 @@ void Kevin_OSInit(void){
     kevin_task3_periodic = &kevin_arr_task_periodic[3];
     kevin_task4_periodic = &kevin_arr_task_periodic[4];
 
+    // task set
     #if kevin_task_set == 0u && kevin_example_task_set == 1u
     kevin_task1_periodic->arrival =     3;
     kevin_task1_periodic->execution =   4;
@@ -2229,7 +2230,7 @@ void Kevin_OSInit(void){
     kevin_arr_aperiodic[1].execution =  2;
     kevin_arr_aperiodic[1].period =     39;
 
-    #if kevin_task_set == 0u || kevin_task_set == 2u
+    #if kevin_task_set == 0u || kevin_task_set == 2u //task set 1 有3個task
     kevin_task_num =        2;
     #elif(kevin_task_set == 1u)
     kevin_task_num =        3;
@@ -2431,14 +2432,10 @@ void Kevin_ContextSwitches(void) {
 
     // print
     // Kevin_print();
-    
-    // print idle
-    // if(OSTCBHighRdy->OSTCBPrio  == 63)
-    //     printf("%d \t Task 63\n", OSTimeGet());
 
     // print next task
-    if(OSTimeGet() && OSTCBCur->OSTCBId != OSTCBHighRdy->OSTCBId)
-        if(OSTCBHighRdy->OSTCBPrio == 63)
+    if(OSTimeGet() && OSTCBCur->OSTCBId != OSTCBHighRdy->OSTCBId) //不是第一個tick 且不是自己
+        if(OSTCBHighRdy->OSTCBPrio == 63) //idle task print prio
             printf("%d \t Task %d\n", OSTimeGet(), OSTCBHighRdy->OSTCBPrio);
         else
             printf("%d \t Task %d\n", OSTimeGet(), OSTCBHighRdy->OSTCBId);
@@ -2533,19 +2530,19 @@ void mywait(int tick)
     OS_CPU_SR cpu_sr = 0;
 #endif
     // int now, exit;
-    int last, diff, taskNum, count = 0;
-    OS_ENTER_CRITICAL();
+    int last, diff, taskNum, count = 0; // 上一次 間隔 taskID 計tick
+    OS_ENTER_CRITICAL(); // 不能被中斷
     // now = OSTimeGet(); // Original but it will miss when interrupt
     // exit = now + tick; // Original but it will miss when interrupt
-    last = OSTimeGet();
-    taskNum = OSTCBCur->OSTCBId; 
-    OS_EXIT_CRITICAL();
+    last = OSTimeGet(); //now time
+    taskNum = OSTCBCur->OSTCBId; // task id
+    OS_EXIT_CRITICAL(); // 恢復
     while (1)
     {
         OS_ENTER_CRITICAL();
-        diff = OSTimeGet() - last;
-        last = OSTimeGet();
-        if(diff >= 1)
+        diff = OSTimeGet() - last; // 間隔
+        last = OSTimeGet(); //now time
+        if(diff >= 1) // 一個tick過去 或 被preempt回來
         {
             count ++;
             // printf(" \t # Task %d count:%d diff:%d\n", taskNum, count, diff); // debug
@@ -2553,7 +2550,7 @@ void mywait(int tick)
          OS_EXIT_CRITICAL();
 
         // if (exit <= OSTimeGet()) // Original but it will miss when interrupt
-        if (tick <= count)
+        if (tick <= count) // 時間到了可以出去
         {
             break;
         }
@@ -2566,39 +2563,39 @@ void mywait(int tick)
 
 void lock_R(int rVar) {
     // INT8U err;
-    #if kevin_part == 1u
+    #if kevin_part == 1u // project part 1
     printf("%d \t Task %d get R%d \n", OSTimeGet(), OSTCBCur->OSTCBId, rVar);
-    OSSchedLock();
-    #elif kevin_part == 2u
-    int R_PRIO;
-    INT8U *OrgPrio;
-    if(rVar == 1)
+    OSSchedLock(); // 用sched lock 讓他不能被其他 task preempt
+    #elif kevin_part == 2u // project part 2
+    int R_PRIO; // 區域 R 優先權
+    INT8U *OrgPrio; // 指向 OSTCBCur->OrgPrio
+    if(rVar == 1) // R1
     {
         R_PRIO = kevin_R1_PRIO;
         OrgPrio = &(OSTCBCur->OrgPrio1);
     }
-    else if (rVar == 2)
+    else if (rVar == 2) // R2
     {
         R_PRIO = kevin_R2_PRIO;
         OrgPrio = &(OSTCBCur->OrgPrio2);
     }
-    else
+    else // error
     {   
         printf("error! no rVar input\n");
         while(1);
     }
     // OSMutexPend(R1, 0, &err);
-    INT8U prioVar = OSTCBCur->OSTCBPrio;
+    INT8U prioVar = OSTCBCur->OSTCBPrio; // 當前 task prio
     *OrgPrio = 0;
-    if(OSTCBCur->OSTCBPrio > R_PRIO)
+    if(OSTCBCur->OSTCBPrio > R_PRIO) // R 的優先權高於 task
     {
         prioVar = R_PRIO;
     }
     printf("%d \t Task %d get R%d     \t %d->%d \n", OSTimeGet(), OSTCBCur->OSTCBId, rVar, OSTCBCur->OSTCBPrio, prioVar);
-    if(prioVar != OSTCBCur->OSTCBPrio)
+    if(prioVar != OSTCBCur->OSTCBPrio) // prioVar 被換過
     {
-        *OrgPrio = OSTCBCur->OSTCBPrio;
-        OSTaskChangePrio(OSTCBCur->OSTCBPrio, R_PRIO);
+        *OrgPrio = OSTCBCur->OSTCBPrio; // 暫存當前 task prio
+        OSTaskChangePrio(OSTCBCur->OSTCBPrio, R_PRIO); // change prio to r prio
     }
     #endif
 }
@@ -2608,30 +2605,30 @@ void lock_R(int rVar) {
 * **************************************************************************************************/
 void unlock_R(int rVar) {
     // INT8U err;
-    #if kevin_part == 1u
+    #if kevin_part == 1u // project part 1
     printf("%d \t Task %d release R%d \n", OSTimeGet(), OSTCBCur->OSTCBId, rVar);
-    OSSchedUnlock();
-    #elif kevin_part == 2u
-    INT8U *OrgPrio;
-    if(rVar == 1)
+    OSSchedUnlock(); // 解鎖 sched lock
+    #elif kevin_part == 2u // project part 2
+    INT8U *OrgPrio; // 指向 OSTCBCur->OrgPrio
+    if(rVar == 1) // R1
         OrgPrio = &(OSTCBCur->OrgPrio1);
-    else if (rVar == 2)
+    else if (rVar == 2) // R2
         OrgPrio = &(OSTCBCur->OrgPrio2);
-    else
+    else // error
     {   
         printf("error! no rVar input\n");
         while(1);
     }
     // OSMutexPost(R1);
-    INT8U prioVar = OSTCBCur->OSTCBPrio;
-    if(*OrgPrio != 0)
+    INT8U prioVar = OSTCBCur->OSTCBPrio; // 當前 task prio
+    if(*OrgPrio != 0) //過去有跟 R 換過
     {
         prioVar = *OrgPrio;
     }
     printf("%d \t Task %d release R%d \t %d->%d \n", OSTimeGet(), OSTCBCur->OSTCBId, rVar, OSTCBCur->OSTCBPrio, prioVar);
-    if(prioVar != OSTCBCur->OSTCBPrio)
+    if(prioVar != OSTCBCur->OSTCBPrio)  // prioVar 被換過
     {
-        OSTaskChangePrio(OSTCBCur->OSTCBPrio, prioVar);
+        OSTaskChangePrio(OSTCBCur->OSTCBPrio, prioVar); // change prio back to task
     }
     #endif
 }
@@ -2640,16 +2637,13 @@ void unlock_R(int rVar) {
 *                      task start
 * **************************************************************************************************/
 void taskStart()
-{
-    // printf("Hello from task%d\n", OSTCBCur->OSTCBId);
-    // while (1); // kevin 讓他一直卡在裡面 靠OSintexit來切
+{   
+    kevin_arr_task_periodic[OSTCBCur->OSTCBId].response = OSTimeGet(); // 開始時間
+    kevin_arr_task_periodic[OSTCBCur->OSTCBId].context = 0; // 歸零 context switch
     
-    kevin_arr_task_periodic[OSTCBCur->OSTCBId].response = OSTimeGet();
-    kevin_arr_task_periodic[OSTCBCur->OSTCBId].context = 0;
-    
-    if(!(OSTimeGet()))
+    if(!(OSTimeGet())) // ostime == 0 因為第一次不會進 context switch 所以在這裡印
         printf("%d \t Task %d\n", OSTimeGet(), OSTCBCur->OSTCBId);
-    kevin_arr_task_periodic[OSTCBCur->OSTCBId].deadline = kevin_arr_task_periodic[OSTCBCur->OSTCBId].arrival + kevin_arr_task_periodic[OSTCBCur->OSTCBId].period * (kevin_arr_task_periodic[OSTCBCur->OSTCBId].job + 1);
+    kevin_arr_task_periodic[OSTCBCur->OSTCBId].deadline = kevin_arr_task_periodic[OSTCBCur->OSTCBId].arrival + kevin_arr_task_periodic[OSTCBCur->OSTCBId].period * (kevin_arr_task_periodic[OSTCBCur->OSTCBId].job + 1); // 計算 deadline = n*period+arrival
     // printf("%d \t # Task%d deadline:%d\n", OSTimeGet(), OSTCBCur->OSTCBId, kevin_arr_task_periodic[OSTCBCur->OSTCBId].deadline); // debug
 }
 
@@ -2658,10 +2652,10 @@ void taskStart()
 * **************************************************************************************************/
 void taskEnd()
 {
-    kevin_arr_task_periodic[OSTCBCur->OSTCBId].job ++;
-    kevin_arr_task_periodic[OSTCBCur->OSTCBId].response = OSTimeGet() - kevin_arr_task_periodic[OSTCBCur->OSTCBId].response; 
+    kevin_arr_task_periodic[OSTCBCur->OSTCBId].job ++; // 做完一次 job+1
+    kevin_arr_task_periodic[OSTCBCur->OSTCBId].response = OSTimeGet() - kevin_arr_task_periodic[OSTCBCur->OSTCBId].response; // 執行一次所花時間 rsponse time = now - start
     // printf("%d \t # Task%d OSTimeDly:%d\n", OSTimeGet(), OSTCBCur->OSTCBId, kevin_arr_task_periodic[OSTCBCur->OSTCBId].deadline - OSTimeGet()); // debug
-    printf("%d \t # Task%d finish response:%d context:%d\n", OSTimeGet(), OSTCBCur->OSTCBId, kevin_arr_task_periodic[OSTCBCur->OSTCBId].response, kevin_arr_task_periodic[OSTCBCur->OSTCBId].context); // debug
-    OSTimeDly(kevin_arr_task_periodic[OSTCBCur->OSTCBId].deadline - OSTimeGet());
+    // printf("%d \t # Task%d finish response:%d context:%d\n", OSTimeGet(), OSTCBCur->OSTCBId, kevin_arr_task_periodic[OSTCBCur->OSTCBId].response, kevin_arr_task_periodic[OSTCBCur->OSTCBId].context); // debug
+    OSTimeDly(kevin_arr_task_periodic[OSTCBCur->OSTCBId].deadline - OSTimeGet()); // delay到下次開始 next = deadline - now
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

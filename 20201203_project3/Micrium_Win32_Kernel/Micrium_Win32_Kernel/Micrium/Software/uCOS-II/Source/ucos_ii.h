@@ -804,22 +804,22 @@ struct KevinPeriodic {
 
     INT8U aperiodic_job_num;      // 紀錄切換次數
 };
-struct KevinPeriodic kevin_arr_task_periodic[5];
-struct KevinPeriodic *kevin_task1_periodic;
+struct KevinPeriodic kevin_arr_task_periodic[5]; // 常規任務
+struct KevinPeriodic *kevin_task1_periodic; // 指標
 struct KevinPeriodic *kevin_task2_periodic;
 struct KevinPeriodic *kevin_task3_periodic;
 struct KevinPeriodic *kevin_task4_periodic;
 
-struct KevinPeriodic kevin_arr_aperiodic[2];
+struct KevinPeriodic kevin_arr_aperiodic[2]; // 偶發任務
 
-static const struct KevinPeriodic EmptyStruct;
+static const struct KevinPeriodic EmptyStruct; // 用來清空
 
-INT8U kevin_task_num;
+INT8U kevin_task_num; // task 數量
 INT8U kevin_arr_short[4]; // 優先順序 rms
-INT8U kevin_aperiodic_num;
-float kevin_aperiodic_us;
+INT8U kevin_aperiodic_num; // 偶發數量
+float kevin_aperiodic_us; // 偶發 utilization rate
 
-INT8U kevin_R1_PRIO;
+INT8U kevin_R1_PRIO; // global r prio
 INT8U kevin_R2_PRIO;
 
 #define kevin_part              2u // part set

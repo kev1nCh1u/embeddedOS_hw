@@ -173,7 +173,7 @@ int  main (void)
         0,
         (OS_TASK_OPT_STK_CHK | OS_TASK_OPT_STK_CLR));
 
-    #if kevin_task_set == 1u
+    #if kevin_task_set == 1u // task set
     if(kevin_task_num >= 3) // kevin
         OSTaskCreateExt(task3,
             0,
@@ -189,7 +189,7 @@ int  main (void)
     // INT8U err;
     // R1 = OSMutexCreate(R1_PRIO, &err);
     // R2 = OSMutexCreate(R2_PRIO, &err);
-    kevin_R1_PRIO = R1_PRIO;
+    kevin_R1_PRIO = R1_PRIO; // to global
     kevin_R2_PRIO = R2_PRIO;
 
     OSTimeSet(0);    // kevin reset time
