@@ -238,116 +238,6 @@ static  void  StartupTask (void *p_arg)
 }
 
 /****************************************************************************************************
-*                      mywait
-* **************************************************************************************************/
-void mywait(int tick)
-{
-#if OS_CRITICAL_METHOD == 3
-    OS_CPU_SR cpu_sr = 0;
-#endif
-    // int now, exit;
-    int last, diff, taskNum, count = 0;
-    OS_ENTER_CRITICAL();
-    // now = OSTimeGet(); // Original but it will miss when interrupt
-    // exit = now + tick; // Original but it will miss when interrupt
-    last = OSTimeGet();
-    taskNum = OSTCBCur->OSTCBId; 
-    OS_EXIT_CRITICAL();
-    while (1)
-    {
-        OS_ENTER_CRITICAL();
-        diff = OSTimeGet() - last;
-        last = OSTimeGet();
-        if(diff >= 1)
-        {
-            count ++;
-            // printf(" \t # Task %d count:%d diff:%d\n", taskNum, count, diff); // debug
-        }
-         OS_EXIT_CRITICAL();
-
-        // if (exit <= OSTimeGet()) // Original but it will miss when interrupt
-        if (tick <= count)
-        {
-            break;
-        }
-    }
-    
-}
-
-/****************************************************************************************************
-*                      lock & unlock
-* **************************************************************************************************/
-
-void lock_R(int rVar) {
-    // INT8U err;
-    #if kevin_part == 1u
-    printf("%d \t Task %d get R%d \n", OSTimeGet(), OSTCBCur->OSTCBId, rVar);
-    OSSchedLock();
-    #elif kevin_part == 2u
-    int R_PRIO;
-    INT8U *OrgPrio;
-    if(rVar == 1)
-    {
-        R_PRIO = R1_PRIO;
-        OrgPrio = &(OSTCBCur->OrgPrio1);
-    }
-    else if (rVar == 2)
-    {
-        R_PRIO = R2_PRIO;
-        OrgPrio = &(OSTCBCur->OrgPrio2);
-    }
-    else
-    {   
-        printf("error! no rVar input\n");
-        while(1);
-    }
-    // OSMutexPend(R1, 0, &err);
-    INT8U prioVar = OSTCBCur->OSTCBPrio;
-    *OrgPrio = 0;
-    if(OSTCBCur->OSTCBPrio > R_PRIO)
-    {
-        prioVar = R_PRIO;
-    }
-    printf("%d \t Task %d get R%d     \t %d->%d \n", OSTimeGet(), OSTCBCur->OSTCBId, rVar, OSTCBCur->OSTCBPrio, prioVar);
-    if(prioVar != OSTCBCur->OSTCBPrio)
-    {
-        *OrgPrio = OSTCBCur->OSTCBPrio;
-        OSTaskChangePrio(OSTCBCur->OSTCBPrio, R_PRIO);
-    }
-    #endif
-}
-
-void unlock_R(int rVar) {
-    // INT8U err;
-    #if kevin_part == 1u
-    printf("%d \t Task %d release R%d \n", OSTimeGet(), OSTCBCur->OSTCBId, rVar);
-    OSSchedUnlock();
-    #elif kevin_part == 2u
-    INT8U *OrgPrio;
-    if(rVar == 1)
-        OrgPrio = &(OSTCBCur->OrgPrio1);
-    else if (rVar == 2)
-        OrgPrio = &(OSTCBCur->OrgPrio2);
-    else
-    {   
-        printf("error! no rVar input\n");
-        while(1);
-    }
-    // OSMutexPost(R1);
-    INT8U prioVar = OSTCBCur->OSTCBPrio;
-    if(*OrgPrio != 0)
-    {
-        prioVar = *OrgPrio;
-    }
-    printf("%d \t Task %d release R%d \t %d->%d \n", OSTimeGet(), OSTCBCur->OSTCBId, rVar, OSTCBCur->OSTCBPrio, prioVar);
-    if(prioVar != OSTCBCur->OSTCBPrio)
-    {
-        OSTaskChangePrio(OSTCBCur->OSTCBPrio, prioVar);
-    }
-    #endif
-}
-
-/****************************************************************************************************
 *                      task1
 * **************************************************************************************************/
 void task1(void* p_arg) {
@@ -355,14 +245,7 @@ void task1(void* p_arg) {
     // INT8U err;
     OSTimeDly(kevin_task1_periodic->arrival);
     while (1) {
-        // printf("Hello from task1\n");
-        // while (1); // kevin 讓他一直卡在裡面 靠OSintexit來切
-        
-        if(!(OSTimeGet()))
-            printf("%d \t Task %d\n", OSTimeGet(), OSTCBCur->OSTCBId);
-        kevin_task1_periodic->deadline = kevin_task1_periodic->arrival + kevin_task1_periodic->period * (kevin_task1_periodic->job + 1);
-        // printf("%d \t # Task 1 deadline:%d\n", OSTimeGet(), kevin_task1_periodic->deadline); // debug
-
+        taskStart();
         /****************************************************************************************************
          *                      Example task set 1
          * **************************************************************************************************/
@@ -414,11 +297,7 @@ void task1(void* p_arg) {
         mywait(1);
         #endif
         /*****************************************************************************************************/
-
-        kevin_task1_periodic->job ++;
-        // printf("%d \t # Task 1 OSTimeDly:%d\n", OSTimeGet(), kevin_task1_periodic->deadline - OSTimeGet()); // debug
-        OSTimeDly(kevin_task1_periodic->deadline - OSTimeGet());
-
+        taskEnd();
     }
 }
 
@@ -430,14 +309,7 @@ void task2(void* p_arg) {
     // INT8U err;
     OSTimeDly(kevin_task2_periodic->arrival);
     while (1) {
-        // printf("Hello from task2\n");
-        // while (1); // kevin 讓他一直卡在裡面 靠OSintexit來切
-
-        if(!(OSTimeGet()))
-            printf("%d \t Task %d\n", OSTimeGet(), OSTCBCur->OSTCBId);
-        kevin_task2_periodic->deadline = kevin_task2_periodic->arrival + kevin_task2_periodic->period * (kevin_task2_periodic->job + 1);
-        // printf("%d \t # Task 2 deadline:%d\n", OSTimeGet(), kevin_task2_periodic->deadline); // debug
-
+        taskStart();
         /****************************************************************************************************
          *                      Example task set 1
          * **************************************************************************************************/
@@ -492,10 +364,7 @@ void task2(void* p_arg) {
         mywait(1);
         #endif
         /*****************************************************************************************************/
-
-        kevin_task2_periodic->job ++;
-        // printf("%d \t # Task 2 OSTimeDly:%d\n", OSTimeGet(), kevin_task2_periodic->deadline - OSTimeGet()); // debug
-        OSTimeDly(kevin_task2_periodic->deadline - OSTimeGet());
+        taskEnd();
     }
 }
 
@@ -507,15 +376,7 @@ void task3(void* p_arg) {
     // INT8U err;
     OSTimeDly(kevin_task3_periodic->arrival);
     while (1) {
-        // printf("Hello from task3\n");
-        // while (1); // kevin 讓他一直卡在裡面 靠OSintexit來切
-
-        if(!(OSTimeGet()))
-            printf("%d \t Task %d\n", OSTimeGet(), OSTCBCur->OSTCBId);
-        kevin_task3_periodic->deadline = kevin_task3_periodic->arrival + kevin_task3_periodic->period * (kevin_task3_periodic->job + 1);
-        // printf("%d \t # Task 2 deadline:%d\n", OSTimeGet(), kevin_task3_periodic->deadline); // debug
-
-        
+        taskStart();
         /****************************************************************************************************
          *                      task set 1
          * **************************************************************************************************/
@@ -528,9 +389,6 @@ void task3(void* p_arg) {
         mywait(1);
         #endif
         /*****************************************************************************************************/
-        
-        kevin_task3_periodic->job ++;
-        // printf("%d \t # Task 2 OSTimeDly:%d\n", OSTimeGet(), kevin_task3_periodic->deadline - OSTimeGet()); // debug
-        OSTimeDly(kevin_task3_periodic->deadline - OSTimeGet());
+        taskEnd();
     }
 }
