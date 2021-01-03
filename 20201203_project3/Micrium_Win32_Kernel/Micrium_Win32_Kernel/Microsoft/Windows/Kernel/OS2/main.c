@@ -48,7 +48,7 @@
 */
 
 #define TASK_STACKSIZE   2048
-
+// task set
 #if kevin_part == 1u
 #define TASK1_PRIORITY   1
 #define TASK2_PRIORITY   2
